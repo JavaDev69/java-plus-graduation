@@ -3,6 +3,7 @@ package ru.practicum.compilation.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.StatsClient;
@@ -20,6 +21,7 @@ import ru.practicum.requests.RequestRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,7 +171,7 @@ public class CompilationServiceImpl implements CompilationService {
         List<Event> allEvents = compilations.stream()
                 .flatMap(c -> c.getEvents().stream())
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
         Map<Long, Long> confirmedRequests = getConfirmedRequestsMap(allEvents);
         Map<Long, Long> views = getViewsMap(allEvents);
@@ -177,11 +179,11 @@ public class CompilationServiceImpl implements CompilationService {
 
         return compilations.stream()
                 .map(comp -> CompilationMapper.toCompilationDto(comp, confirmedRequests, views, ratings))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Map<Long, Long> getRatingsMap(List<Event> events) {
-        if (events.isEmpty()) return Map.of();
+        if (events.isEmpty()) return Collections.emptyMap();
         List<Long> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
         List<Object[]> results = rateRepository.getRatingsForEvents(eventIds);
         return results.stream().collect(Collectors.toMap(
@@ -201,7 +203,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         List<Long> eventIds = events.stream()
                 .map(Event::getId)
-                .collect(Collectors.toList());
+                .toList();
 
         List<Object[]> results = requestRepository.countConfirmedRequestsByEventIds(eventIds, EventState.CONFIRMED);
 
@@ -219,21 +221,22 @@ public class CompilationServiceImpl implements CompilationService {
      * @return карта, где ключ - идентификатор события, значение - количество просмотров
      */
     private Map<Long, Long> getViewsMap(List<Event> events) {
-        if (events.isEmpty()) return Map.of();
+        if (events.isEmpty()) return Collections.emptyMap();
 
         List<String> uris = events.stream()
                 .map(e -> "/events/" + e.getId())
-                .collect(Collectors.toList());
+                .toList();
 
         LocalDateTime start = LocalDateTime.now().minusYears(10);
         LocalDateTime end = LocalDateTime.now();
 
         List<ViewStats> stats;
         try {
-            stats = statsClient.getStats(start, end, uris, true);
+            ResponseEntity<List<ViewStats>> response = statsClient.getStats(start, end, uris, true);
+            stats = response.getBody();
         } catch (Exception e) {
             log.error("Ошибка при получении статистики", e);
-            return Map.of();
+            return Collections.emptyMap();
         }
 
         Map<Long, Long> viewsMap = new HashMap<>();

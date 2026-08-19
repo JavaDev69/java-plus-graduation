@@ -327,7 +327,7 @@ public class EventsServiceImpl implements EventsService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
 
-        if (!event.getInitiator().getId().equals(userId)) {
+        if (!event.getInitiator().getId().equals(user.getId())) {
             throw new ForbiddenActionException(
                     "Пользователь с ID " + userId + " не является инициатором события " + eventId
             );
@@ -374,7 +374,14 @@ public class EventsServiceImpl implements EventsService {
 
     private List<ViewStats> getStats(List<String> uris) {
         try {
-            return statsClient.getStats(LocalDateTime.of(2000, 1, 1, 0, 0, 0), LocalDateTime.now(), uris, true);
+            return statsClient
+                    .getStats(
+                            LocalDateTime.of(2000, 1, 1, 0, 0, 0),
+                            LocalDateTime.now(),
+                            uris,
+                            true
+                    )
+                    .getBody();
         } catch (Exception e) {
             return Collections.emptyList();
         }

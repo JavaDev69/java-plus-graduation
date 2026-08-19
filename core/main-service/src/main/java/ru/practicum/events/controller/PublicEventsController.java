@@ -66,7 +66,7 @@ public class PublicEventsController {
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
                 .build();
-        statsClient.hit(hit);
+        statsClient.saveHit(hit);
 
         List<EventShortDto> events = eventService.getPublishedEvents(
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
@@ -87,7 +87,7 @@ public class PublicEventsController {
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
                 .build();
-        statsClient.hit(hit);
+        statsClient.saveHit(hit);
 
         EventFullDto event = eventService.getPublishedEventById(id);
         return ResponseEntity.ok(event);

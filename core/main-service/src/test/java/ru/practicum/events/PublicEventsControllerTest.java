@@ -68,7 +68,7 @@ public class PublicEventsControllerTest {
                 .andExpect(jsonPath("$[0].title").value("Festival"))
                 .andExpect(jsonPath("$[0].views").value(100));
 
-        verify(statsClient).hit(any(EndpointHit.class));
+        verify(statsClient).saveHit(any(EndpointHit.class));
     }
 
     @Test
@@ -88,7 +88,7 @@ public class PublicEventsControllerTest {
                 .andExpect(jsonPath("$.title").value("Concert"))
                 .andExpect(jsonPath("$.views").value(200));
 
-        verify(statsClient).hit(any(EndpointHit.class));
+        verify(statsClient).saveHit(any(EndpointHit.class));
     }
 }
 
