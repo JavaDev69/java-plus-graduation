@@ -11,6 +11,7 @@ import ru.practicum.dto.ViewStats;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -46,6 +47,7 @@ public class StatsClientImpl implements StatsClient {
         }
         URI uri = builder.build().encode().toUri();
         ResponseEntity<ViewStats[]> response = restTemplate.getForEntity(uri, ViewStats[].class);
-        return List.of(response.getBody());
+        ViewStats[] body = response.getBody();
+        return body == null ? Collections.emptyList() : List.of(body);
     }
 }

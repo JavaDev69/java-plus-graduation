@@ -1,13 +1,29 @@
 services:
+  discovery-server:
+    build: ./infra/discovery-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - ewm-net
+
   stats-server:
     build: ./stats/stats-service
     environment:
       DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats_db
       DATASOURCE_USERNAME: dbuser
       DATASOURCE_PASSWORD: 12345
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
     ports:
       - "9090:9090"
     depends_on:
+      discovery-server:
+        condition: service_healthy
       stats-db:
         condition: service_healthy
     healthcheck:
@@ -25,9 +41,13 @@ services:
       DATASOURCE_USERNAME: dbuser
       DATASOURCE_PASSWORD: 12345
       STATS_SERVER_URL: http://stats-server:9090
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
     ports:
       - "8080:8080"
     depends_on:
+      discovery-server:
+        condition: service_healthy
       ewm-db:
         condition: service_healthy
     healthcheck:
