@@ -1,10 +1,8 @@
 package ru.practicum.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.StatsOperation;
 import ru.practicum.dto.ViewStats;
@@ -19,19 +17,17 @@ public class StatsController implements StatsOperation {
     private final StatsService statsService;
 
     @Override
-    @PostMapping("/hit")
-    public ResponseEntity<Void> saveHit(@RequestBody @Valid EndpointHit dto) {
+    public ResponseEntity<Void> saveHit(EndpointHit dto) {
         statsService.saveHit(dto);
         return ResponseEntity.status(201).build();
     }
 
     @Override
-    @GetMapping("/stats")
     public ResponseEntity<List<ViewStats>> getStats(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-            @RequestParam(required = false) List<String> uris,
-            @RequestParam(defaultValue = "false") Boolean unique) {
+            LocalDateTime start,
+            LocalDateTime end,
+            List<String> uris,
+            Boolean unique) {
         List<ViewStats> stats = statsService.getStats(start, end, uris, unique);
         return ResponseEntity.ok(stats);
     }

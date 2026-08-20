@@ -23,7 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.practicum.common.Constance.FORMATTER;
 
-@WebMvcTest(PublicEventsController.class)
+@WebMvcTest(controllers = PublicEventsController.class,
+        properties = {
+                "spring.cloud.config.enabled=false",
+                "spring.config.location=classpath:application-test.properties"
+        })
 public class PublicEventsControllerTest {
 
     @Autowired

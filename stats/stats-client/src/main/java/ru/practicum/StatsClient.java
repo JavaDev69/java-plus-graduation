@@ -6,7 +6,6 @@ import ru.practicum.dto.StatsOperation;
 
 @FeignClient(
         name = "stats-service",
-        url = "${stats.server.url}",
         configuration = FeignClientConfig.class)
 public interface StatsClient extends StatsOperation {
 

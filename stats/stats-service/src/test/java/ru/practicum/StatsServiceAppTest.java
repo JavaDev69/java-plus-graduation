@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.entity.EndpointHitEntity;
@@ -13,11 +14,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 
-@DataJpaTest
+
+@DataJpaTest(properties = {
+        "spring.cloud.config.enabled=false",
+        "spring.config.location=classpath:application-test.yml"
+})
+@ActiveProfiles("test")
 @Import(StatsService.class)
-public class StatsServiceAppTest {
+class StatsServiceAppTest {
 
     @Autowired
     private StatsRepository statsRepository;

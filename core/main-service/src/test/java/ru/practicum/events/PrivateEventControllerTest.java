@@ -30,7 +30,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.practicum.common.Constance.FORMATTER;
 
-@SpringBootTest
+@SpringBootTest(
+        properties = {
+                "spring.cloud.config.enabled=false",
+                "spring.config.location=classpath:application-test.properties"
+        })
 @AutoConfigureMockMvc
 @Transactional
 @Rollback

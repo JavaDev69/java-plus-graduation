@@ -1,29 +1,18 @@
-server:
-  port: 8080
-
 spring:
   application:
-    name: main-server
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        format_sql: true
-  sql:
-    init:
-      mode: always
-
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5431/ewm_db}
-    username: ${DATASOURCE_USERNAME:dbuser}
-    password: ${DATASOURCE_PASSWORD:12345}
-
-stats:
-  server:
-    url: ${STATS_SERVER_URL:http://localhost:8081}
-
+    name: main-service
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+      fail-fast: true
+      retry:
+        use-randome-policy: true
+        max-interval: 20000
+        initial-interval: 2000
 
 eureka:
   instance:
@@ -31,8 +20,3 @@ eureka:
   client:
     service-url:
       defaultZone: http://${EUREKA_HOSTNAME:localhost}:${EUREKA_PORT:8761}/eureka/
-
-logging:
-  level:
-    com.fasterxml.jackson: DEBUG
-    org.springframework.web: DEBUG
