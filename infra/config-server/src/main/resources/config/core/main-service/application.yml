@@ -28,3 +28,4 @@ logging:
   level:
     com.fasterxml.jackson: DEBUG
     org.springframework.web: DEBUG
+    ru.practicum: DEBUG

@@ -1,0 +1,69 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      discovery.locator.enabled: true
+      routes:
+#stats-service
+        - id: stat_hit_route
+          uri: lb://stats-server
+          predicates:
+            - Path=/hit/**
+            - Method=POST
+        - id: stat_stats_route
+          uri: lb://stats-server
+          predicates:
+            - Path=/stats/**
+            - Method=GET
+#main-service
+        - id: main_admin_compilations_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/compilations/**
+            - Method=POST,DELETE,PATCH
+        - id: main_compilations_route
+          uri: lb://main-service
+          predicates:
+            - Path=/compilations/**
+            - Method=GET
+        - id: main_admin_categories_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/categories/**
+            - Method=POST,DELETE,PATCH
+        - id: main_users_route
+          uri: lb://main-service
+          predicates:
+            - Path=/users/**
+            - Method=GET,POST,PATCH,DELETE
+        - id: main_categories_route
+          uri: lb://main-service
+          predicates:
+            - Path=/categories/**
+            - Method=GET
+        - id: main_admin_events_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/events/**
+            - Method=GET,PATCH
+        - id: main_events_route
+          uri: lb://main-service
+          predicates:
+            - Path=/events/**
+            - Method=GET
+        - id: main_admin_users_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/users/**
+            - Method=GET,POST,DELETE
+        - id: main_admin_comments_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/comments/**
+
+logging:
+  level:
+    org.springframework: ERROR
+    org.zalando.logbook: TRACE
