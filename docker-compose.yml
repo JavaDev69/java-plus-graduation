@@ -46,7 +46,7 @@ services:
       - ewm-net
 
   stats-server:
-    build: ./stats/stats-service
+    build: ./stats/stats-server
     environment:
       APP_PORT: 0
       DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats_db
