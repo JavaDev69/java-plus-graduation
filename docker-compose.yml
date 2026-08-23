@@ -48,6 +48,7 @@ services:
   stats-server:
     build: ./stats/stats-service
     environment:
+      APP_PORT: 0
       DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats_db
       DATASOURCE_USERNAME: dbuser
       DATASOURCE_PASSWORD: 12345
@@ -72,6 +73,7 @@ services:
   ewm-service:
     build: ./core/main-service
     environment:
+      APP_PORT: 0
       DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_db
       DATASOURCE_USERNAME: dbuser
       DATASOURCE_PASSWORD: 12345
