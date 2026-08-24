@@ -15,7 +15,11 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PrivateRateController.class)
+@WebMvcTest(controllers = PrivateRateController.class,
+        properties = {
+                "spring.cloud.config.enabled=false",
+                "spring.config.location=classpath:application-test.properties"
+        })
 class PrivateRateControllerTest {
 
     @Autowired

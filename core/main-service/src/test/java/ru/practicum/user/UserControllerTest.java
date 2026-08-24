@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -27,7 +28,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(
+        properties = {
+                "spring.cloud.config.enabled=false",
+                "spring.config.location=classpath:application-test.properties"
+        })
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserControllerTest {
@@ -35,9 +40,9 @@ class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private static String pattern = "yyyy-MM-dd HH:mm:ss";
-    private static ObjectMapper objectMapper = new ObjectMapper();
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+    private static final String pattern = "yyyy-MM-dd HH:mm:ss";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
 
     /**
      * Тест 1: Успешное создание пользователя (201 Created)
@@ -255,7 +260,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(15)) // Ожидаем 15 записей
-                .andExpect(jsonPath("$[0].id").value(targetIds.get(0))) // Первый ID из targetIds
+                .andExpect(jsonPath("$[0].id").value(targetIds.getFirst())) // Первый ID из targetIds
                 .andExpect(jsonPath("$[14].id").value(targetIds.get(14))); // Последний ID из targetIds
     }
 
@@ -302,7 +307,6 @@ class UserControllerTest {
     /**
      * Вспомогательный метод проверки формата LocalDateTime (yyyy-MM-dd HH:mm:ss) в теле ответа
      *
-     * @return
      */
     private ResultMatcher isValidTimestampFormat() {
         return result -> {

@@ -1,13 +1,64 @@
 services:
-  stats-server:
-    build: ./stats/stats-service
+
+  discovery-server:
+    build: ./infra/discovery-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - ewm-net
+
+  config-server:
+    build: ./infra/config-server
     environment:
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "true" ]
+      interval: 24h
+      start_period: 10s
+      start_interval: 10s
+    networks:
+      - ewm-net
+
+  gateway-server:
+    build: ./infra/gateway-server
+    ports:
+      - "8080:8080"
+      - "9090:8080"
+    environment:
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ewm-net
+
+  stats-server:
+    build: ./stats/stats-server
+    environment:
+      APP_PORT: 0
       DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats_db
       DATASOURCE_USERNAME: dbuser
       DATASOURCE_PASSWORD: 12345
-    ports:
-      - "9090:9090"
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
     depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
       stats-db:
         condition: service_healthy
     healthcheck:
@@ -15,19 +66,25 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    restart: unless-stopped
     networks:
       - ewm-net
 
   ewm-service:
     build: ./core/main-service
     environment:
+      APP_PORT: 0
       DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_db
       DATASOURCE_USERNAME: dbuser
       DATASOURCE_PASSWORD: 12345
       STATS_SERVER_URL: http://stats-server:9090
-    ports:
-      - "8080:8080"
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
     depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
       ewm-db:
         condition: service_healthy
     healthcheck:
@@ -35,6 +92,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    restart: unless-stopped
     networks:
       - ewm-net
 
@@ -46,13 +104,14 @@ services:
       POSTGRES_DB: ewm_db
       POSTGRES_USER: dbuser
       POSTGRES_PASSWORD: 12345
-    ports:
-      - "5431:5432"
     healthcheck:
       test: pg_isready -q -d "$$POSTGRES_DB" -U "$$POSTGRES_USER"
       timeout: 5s
       interval: 5s
       retries: 10
+    depends_on:
+      config-server:
+        condition: service_started
     networks:
       - ewm-net
 
@@ -60,8 +119,6 @@ services:
     image: postgres:16.1
     container_name: stats-db
     hostname: stats-db
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_DB: stats_db
       POSTGRES_USER: dbuser
@@ -71,6 +128,9 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
+    depends_on:
+      config-server:
+        condition: service_started
     networks:
       - ewm-net
 

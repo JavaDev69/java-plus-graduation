@@ -1,13 +1,12 @@
 package ru.practicum;
 
-import ru.practicum.dto.EndpointHit;
-import ru.practicum.dto.ViewStats;
+import org.springframework.cloud.openfeign.FeignClient;
+import ru.practicum.config.FeignClientConfig;
+import ru.practicum.dto.StatsOperation;
 
-import java.time.LocalDateTime;
-import java.util.List;
+@FeignClient(
+        name = "stats-server",
+        configuration = FeignClientConfig.class)
+public interface StatsClient extends StatsOperation {
 
-public interface StatsClient {
-    void hit(EndpointHit hit);
-
-    List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique);
 }

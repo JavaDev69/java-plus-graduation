@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.categories.AdminCategoryController;
 import ru.practicum.categories.service.CategoryService;
@@ -16,7 +17,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AdminCategoryController.class)
+@WebMvcTest(controllers = AdminCategoryController.class,
+properties = {
+        "spring.cloud.config.enabled=false",
+        "spring.config.location=classpath:application-test.properties"
+})
 class AdminCategoryControllerTest {
 
     @Autowired

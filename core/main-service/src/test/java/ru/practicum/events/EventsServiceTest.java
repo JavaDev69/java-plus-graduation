@@ -22,7 +22,11 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(
+        properties = {
+                "spring.cloud.config.enabled=false",
+                "spring.config.location=classpath:application-test.properties"
+        })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 @Rollback

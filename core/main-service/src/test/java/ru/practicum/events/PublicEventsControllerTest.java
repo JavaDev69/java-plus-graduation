@@ -23,7 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.practicum.common.Constance.FORMATTER;
 
-@WebMvcTest(PublicEventsController.class)
+@WebMvcTest(controllers = PublicEventsController.class,
+        properties = {
+                "spring.cloud.config.enabled=false",
+                "spring.config.location=classpath:application-test.properties"
+        })
 public class PublicEventsControllerTest {
 
     @Autowired
@@ -68,7 +72,7 @@ public class PublicEventsControllerTest {
                 .andExpect(jsonPath("$[0].title").value("Festival"))
                 .andExpect(jsonPath("$[0].views").value(100));
 
-        verify(statsClient).hit(any(EndpointHit.class));
+        verify(statsClient).saveHit(any(EndpointHit.class));
     }
 
     @Test
@@ -88,7 +92,7 @@ public class PublicEventsControllerTest {
                 .andExpect(jsonPath("$.title").value("Concert"))
                 .andExpect(jsonPath("$.views").value(200));
 
-        verify(statsClient).hit(any(EndpointHit.class));
+        verify(statsClient).saveHit(any(EndpointHit.class));
     }
 }
 
