@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.categories.AdminCategoryController;
 import ru.practicum.categories.service.CategoryService;
@@ -75,7 +74,7 @@ class AdminCategoryControllerTest {
         request.setName("Music");
 
         when(categoryService.createCategory(request))
-                .thenThrow(new ru.practicum.error.exception.ConflictException(
+                .thenThrow(new ru.practicum.exception.ConflictException(
                         "Category with name 'Music' already exists"));
 
         mockMvc.perform(post("/admin/categories")
@@ -101,7 +100,7 @@ class AdminCategoryControllerTest {
     @Test
     void updateCategory_notFound_shouldReturn404() throws Exception {
         when(categoryService.updateCategory(eq(999L), any()))
-                .thenThrow(new ru.practicum.error.exception.NotFoundException("Not found"));
+                .thenThrow(new ru.practicum.exception.NotFoundException("Not found"));
 
         CategoryDto update = new CategoryDto();
         update.setName("New Name");
@@ -114,7 +113,7 @@ class AdminCategoryControllerTest {
 
     @Test
     void deleteCategory_inUse_shouldReturn409() throws Exception {
-        doThrow(new ru.practicum.error.exception.ConflictException("Used"))
+        doThrow(new ru.practicum.exception.ConflictException("Used"))
                 .when(categoryService).deleteCategory(1L);
 
         mockMvc.perform(delete("/admin/categories/1"))

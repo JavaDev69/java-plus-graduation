@@ -18,7 +18,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("SELECT COUNT(c) > 0 FROM Comment c " +
             "WHERE c.event.id = :eventId " +
-            "AND c.author.id = :userId " +
+            "AND c.authorId = :userId " +
             "AND c.status IN :statuses")
     boolean existsByEventIdAndAuthorIdAndStatusIn(
             @Param("eventId") Long eventId,

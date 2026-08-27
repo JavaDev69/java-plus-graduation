@@ -5,18 +5,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.client.UserClient;
 import ru.practicum.dto.events.EventState;
-import ru.practicum.error.exception.ConflictException;
-import ru.practicum.error.exception.NotFoundException;
+import ru.practicum.dto.user.UserDto;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.events.Event;
 import ru.practicum.events.EventsMapper;
 import ru.practicum.events.EventsRepository;
 import ru.practicum.dto.events.EventShortDto;
 import ru.practicum.requests.RequestRepository;
-import ru.practicum.user.User;
-import ru.practicum.user.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
-    private final UserRepository userRepository;
+    private final UserClient userClient;
     private final EventsRepository eventsRepository;
     private final RequestRepository requestRepository;
 
@@ -39,14 +41,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             throw new ConflictException("User cannot subscribe to himself");
         }
 
-        User subscriber = findUserById(userId);
-        User publisher = findUserById(publisherId);
+        UserDto subscriber = userClient.getById(userId);
+        UserDto publisher = userClient.getById(publisherId);
 
-        if (subscriptionRepository.existsBySubscriber_IdAndPublisher_Id(userId, publisherId)) {
+        if (subscriptionRepository.existsBySubscriberIdAndPublisherId(userId, publisherId)) {
             throw new ConflictException("User with id=" + userId + " is already subscribed to user with id=" + publisherId);
         }
 
-        subscriptionRepository.save(new Subscription(null, subscriber, publisher, LocalDateTime.now()));
+        subscriptionRepository.save(new Subscription(null, subscriber.getId(), publisher.getId(), LocalDateTime.now(ZoneId.systemDefault())));
         log.info("Пользователь с ID {} успешно подписался на пользователя с ID {}", userId, publisherId);
     }
 
@@ -54,10 +56,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public void unsubscribe(Long userId, Long publisherId) {
         log.info("Пользователь с ID {} отписывается от пользователя с ID {}", userId, publisherId);
 
-        findUserById(userId);
-        findUserById(publisherId);
+        UserDto subscriber = userClient.getById(userId);
+        UserDto publisher = userClient.getById(publisherId);
 
-        int deleted = subscriptionRepository.deleteBySubscriberIdAndPublisherId(userId, publisherId);
+        int deleted = subscriptionRepository.deleteBySubscriberIdAndPublisherId(subscriber.getId(), publisher.getId());
         if (deleted == 0) {
             throw new NotFoundException("Subscription from user with id=" + userId +
                     " to user with id=" + publisherId + " was not found");
@@ -71,12 +73,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public List<EventShortDto> getActualEventsFromSubscriptions(Long userId, int from, int size) {
         log.info("Получение актуальных событий пользователя с ID {}, from: {}, size: {}", userId, from, size);
 
-        findUserById(userId);
+        UserDto user = userClient.getById(userId);
 
         List<Event> events = eventsRepository.findActualPublishedEventsBySubscriberId(
-                userId,
+                user.getId(),
                 EventState.PUBLISHED,
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneId.systemDefault()),
                 PageRequest.of(from / size, size)
         );
 
@@ -87,14 +89,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .collect(Collectors.toList());
     }
 
-    private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
-    }
-
     private Map<Long, Long> getConfirmedRequests(List<Event> events) {
         if (events.isEmpty()) {
-            return Map.of();
+            return Collections.emptyMap();
         }
 
         List<Long> eventIds = events.stream()

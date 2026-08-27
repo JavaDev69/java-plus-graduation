@@ -8,22 +8,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.categories.Category;
-import ru.practicum.events.Event;
-import ru.practicum.dto.events.EventState;
-import ru.practicum.events.EventsRepository;
-import ru.practicum.dto.events.Location;
 import ru.practicum.dto.events.EventFullDto;
+import ru.practicum.dto.events.EventState;
+import ru.practicum.dto.events.Location;
+import ru.practicum.events.Event;
+import ru.practicum.events.EventsRepository;
 import ru.practicum.events.moderation.ModerationComment;
 import ru.practicum.events.moderation.ModerationCommentRepository;
 import ru.practicum.events.service.EventsServiceImpl;
-import ru.practicum.user.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -192,9 +190,6 @@ class EventServiceImplTest {
     }
 
     private Event createEvent(Long id, Long userId, EventState state) {
-        User user = new User();
-        user.setId(userId);
-
         Category category = new Category();
         category.setId(100L);
 
@@ -213,7 +208,7 @@ class EventServiceImplTest {
                 .requestModeration(false)
                 .title("Test event " + id)
                 .state(state)
-                .initiator(user)
+                .initiatorId(userId)
                 .build();
     }
 
@@ -228,7 +223,7 @@ class EventServiceImplTest {
                     comment.setEvent(event);
                     return comment;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 }
 

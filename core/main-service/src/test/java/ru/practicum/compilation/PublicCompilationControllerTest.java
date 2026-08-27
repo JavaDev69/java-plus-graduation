@@ -9,7 +9,7 @@ import ru.practicum.compilation.controller.PublicCompilationController;
 import ru.practicum.compilation.service.CompilationService;
 
 import ru.practicum.dto.compilation.CompilationDto;
-import ru.practicum.error.exception.NotFoundException;
+import ru.practicum.exception.NotFoundException;
 
 import java.util.Collections;
 import java.util.List;

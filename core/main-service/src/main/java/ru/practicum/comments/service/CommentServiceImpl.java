@@ -5,21 +5,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.comments.*;
+import ru.practicum.client.UserClient;
+import ru.practicum.comments.Comment;
+import ru.practicum.comments.CommentMapper;
+import ru.practicum.comments.CommentRepository;
 import ru.practicum.dto.comments.CommentDto;
 import ru.practicum.dto.comments.CommentStatus;
 import ru.practicum.dto.comments.NewCommentDto;
 import ru.practicum.dto.comments.UpdateCommentByAuthorRequest;
 import ru.practicum.dto.comments.UpdateCommentByModeratorRequest;
-import ru.practicum.error.exception.NotFoundException;
+import ru.practicum.dto.user.UserDto;
 import ru.practicum.events.Event;
 import ru.practicum.events.EventsRepository;
-import ru.practicum.user.User;
-import ru.practicum.user.UserRepository;
+import ru.practicum.exception.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,16 +30,16 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
+    private final UserClient userClient;
     private final EventsRepository eventsRepository;
 
     @Transactional
     @Override
     public CommentDto addComment(Long userId, Long eventId, NewCommentDto dto) {
-        Optional<User> author = userRepository.findById(userId);
+        UserDto author = userClient.getById(userId);
         Event event = eventsRepository.getReferenceById(eventId);
 
-        Comment comment = CommentMapper.toComment(dto, event, author.orElseThrow());
+        Comment comment = CommentMapper.toComment(dto, event, author);
         Comment saved = commentRepository.save(comment);
 
         return CommentMapper.toCommentDto(saved);
@@ -66,7 +67,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto updateCommentByAuthor(Long userId, Long commentId, UpdateCommentByAuthorRequest request) {
         Comment comment = commentRepository.findById(commentId).orElseThrow();
 
-        if (!comment.getAuthor().getId().equals(userId)) {
+        if (!comment.getAuthorId().equals(userId)) {
             throw new IllegalArgumentException("Only author can edit comment");
         }
         if (comment.getStatus() != CommentStatus.PENDING && comment.getStatus() != CommentStatus.APPROVED) {
@@ -105,7 +106,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("Comment not found"));
 
-        if (!comment.getAuthor().getId().equals(userId)) {
+        if (!comment.getAuthorId().equals(userId)) {
             throw new IllegalArgumentException("You can only delete your own comments");
         }
         if (comment.getStatus() == CommentStatus.REJECTED) {

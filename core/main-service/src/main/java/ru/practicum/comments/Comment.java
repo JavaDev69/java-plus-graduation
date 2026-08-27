@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.dto.comments.CommentStatus;
 import ru.practicum.events.Event;
-import ru.practicum.user.User;
 
 import java.time.LocalDateTime;
 
@@ -28,13 +27,12 @@ public class Comment {
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    private User author;
+    @Column(name = "author_id", nullable = false)
+    private Long authorId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CommentStatus status; // PENDING, APPROVED, REJECTED
+    private CommentStatus status;
 
     @Column(name = "created_on", nullable = false)
     private LocalDateTime createdOn;

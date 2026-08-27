@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.StatsClient;
 import ru.practicum.categories.Category;
 import ru.practicum.categories.CategoryRepository;
+import ru.practicum.client.UserClient;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.dto.events.EventFullDto;
 import ru.practicum.dto.events.EventShortDto;
@@ -24,25 +25,31 @@ import ru.practicum.dto.events.StateAction;
 import ru.practicum.dto.events.UpdateEventAdminRequest;
 import ru.practicum.dto.events.UpdateEventRequest;
 import ru.practicum.dto.events.UpdateEventUserRequest;
-import ru.practicum.error.exception.ForbiddenActionException;
-import ru.practicum.events.*;
-import ru.practicum.dto.events.*;
-import ru.practicum.error.exception.ConflictException;
-import ru.practicum.error.exception.EventCreationRuleException;
-import ru.practicum.error.exception.NotFoundException;
+import ru.practicum.dto.user.UserDto;
+import ru.practicum.events.Event;
+import ru.practicum.events.EventsMapper;
+import ru.practicum.events.EventsRepository;
+import ru.practicum.events.EventsSortType;
 import ru.practicum.events.moderation.ModerationComment;
 import ru.practicum.events.moderation.ModerationCommentRepository;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.EventCreationRuleException;
+import ru.practicum.exception.ForbiddenActionException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.rating.RateRepository;
 import ru.practicum.requests.RequestRepository;
-import ru.practicum.user.User;
-import ru.practicum.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static ru.practicum.events.EventsMapper.*;
+import static ru.practicum.events.EventsMapper.toEvent;
+import static ru.practicum.events.EventsMapper.toEventFullDto;
+import static ru.practicum.events.EventsMapper.toShortEventDto;
 
 @Service
 @RequiredArgsConstructor
@@ -53,21 +60,21 @@ public class EventsServiceImpl implements EventsService {
     private final EventsRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
-    private final UserRepository userRepository;
+    private final UserClient userClient;
     private final StatsClient statsClient;
     private final EntityManager entityManager;
-    private final RateRepository rateRepository; // <--- ДОБАВЛЕНО
+    private final RateRepository rateRepository;
     private final ModerationCommentRepository moderationCommentRepository;
 
     @Override
     public EventFullDto saveEvent(NewEventDto newEventDto, Long userId) {
         validateEventDate(newEventDto.getEventDate());
-        User user = findUserById(userId);
+        UserDto user = userClient.getById(userId);
         Category category = findCategoryById(newEventDto.getCategory());
 
         Event event = toEvent(newEventDto, user, category);
         Event savedEvent = eventRepository.save(event);
-        savedEvent.setInitiator(user);
+        savedEvent.setInitiatorId(user.getId());
         savedEvent.setCategory(category);
 
         return toEventFullDto(savedEvent, 0L);
@@ -146,7 +153,7 @@ public class EventsServiceImpl implements EventsService {
         if (states != null && !states.isEmpty()) {
             List<EventState> stateEnums = states.stream()
                     .map(EventState::valueOf)
-                    .collect(Collectors.toList());
+                    .toList();
             predicates.add(root.get("state").in(stateEnums));
         }
 
@@ -240,8 +247,8 @@ public class EventsServiceImpl implements EventsService {
                 .orElseThrow(() -> new NotFoundException("Событие с ID " + eventId + " не найдено"));
 
         // 2. Проверяем принадлежность события пользователю
-        User user = event.getInitiator();
-        if (!user.getId().equals(userId)) {
+        Long initiatorId = event.getInitiatorId();
+        if (!initiatorId.equals(userId)) {
             throw new ForbiddenActionException("Пользователь с ID " + userId + " не является инициатором события " + eventId);
         }
 
@@ -296,7 +303,7 @@ public class EventsServiceImpl implements EventsService {
         log.debug("Начинаем поиск событий для пользователя с ID: {}, from: {}, size: {}", userId, from, size);
 
 
-        User user = findUserById(userId);
+        UserDto user = userClient.getById(userId);
         List<Event> events = eventRepository.findAllByInitiatorIdWithOffset(user.getId(), from, size);
 
         if (events.isEmpty()) {
@@ -321,13 +328,13 @@ public class EventsServiceImpl implements EventsService {
         log.debug("Начинаем поиск события с ID: {} для пользователя с ID: {}", eventId, userId);
 
         // Находим пользователя — если не найден, будет выброшено исключение NotFoundException
-        User user = findUserById(userId);
+        UserDto user = userClient.getById(userId);
 
         // Ищем событие по ID и проверяем принадлежность пользователю
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
 
-        if (!event.getInitiator().getId().equals(user.getId())) {
+        if (!event.getInitiatorId().equals(user.getId())) {
             throw new ForbiddenActionException(
                     "Пользователь с ID " + userId + " не является инициатором события " + eventId
             );
@@ -360,11 +367,6 @@ public class EventsServiceImpl implements EventsService {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EventCreationRuleException("categoryId", categoryId,
                         "Категория с ID " + categoryId + " не найдена в базе данных"));
-    }
-
-    private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
     }
 
     private void setViewsToEvent(Event event) {

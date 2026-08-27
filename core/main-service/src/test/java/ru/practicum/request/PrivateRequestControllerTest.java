@@ -11,8 +11,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
-import ru.practicum.error.exception.ForbiddenActionException;
-import ru.practicum.error.exception.NotFoundException;
+import ru.practicum.exception.ForbiddenActionException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.dto.events.EventState;
 import ru.practicum.requests.service.RequestsService;
 

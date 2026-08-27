@@ -12,7 +12,7 @@ import ru.practicum.dto.ViewStats;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.NewCompilationDto;
 import ru.practicum.dto.compilation.UpdateCompilationRequest;
-import ru.practicum.error.exception.NotFoundException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.events.Event;
 import ru.practicum.dto.events.EventState;
 import ru.practicum.events.EventsRepository;

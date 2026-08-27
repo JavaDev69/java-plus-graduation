@@ -5,19 +5,18 @@ import lombok.SneakyThrows;
 import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.error.exception.ConflictException;
-import ru.practicum.error.exception.ForbiddenActionException;
-import ru.practicum.error.exception.NotFoundException;
-import ru.practicum.events.Event;
 import ru.practicum.dto.events.EventState;
-import ru.practicum.events.EventsRepository;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
+import ru.practicum.events.Event;
+import ru.practicum.events.EventsRepository;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.ForbiddenActionException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.requests.ParticipationRequest;
 import ru.practicum.requests.RequestRepository;
 import ru.practicum.requests.RequestsMapper;
-import ru.practicum.user.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,6 @@ import java.util.List;
 public class RequestsServiceImpl implements RequestsService {
 
     private final EventsRepository eventsRepository;
-    private final UserRepository userRepository;
     private final RequestRepository requestRepository;
 
     @Override
@@ -40,7 +38,7 @@ public class RequestsServiceImpl implements RequestsService {
         Event event = eventsRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
 
-        if (!event.getInitiator().getId().equals(userId)) {
+        if (!event.getInitiatorId().equals(userId)) {
             throw new ForbiddenActionException("User is not the initiator of the event");
         }
 
@@ -107,7 +105,7 @@ public class RequestsServiceImpl implements RequestsService {
         Event event = eventsRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
 
-        if (!event.getInitiator().getId().equals(userId)) {
+        if (!event.getInitiatorId().equals(userId)) {
             throw new ForbiddenActionException("User is not the initiator of the event");
         }
 

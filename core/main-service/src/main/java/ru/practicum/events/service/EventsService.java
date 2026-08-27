@@ -5,8 +5,8 @@ import ru.practicum.dto.events.EventShortDto;
 import ru.practicum.dto.events.NewEventDto;
 import ru.practicum.dto.events.UpdateEventAdminRequest;
 import ru.practicum.dto.events.UpdateEventUserRequest;
-import ru.practicum.error.exception.ForbiddenActionException;
-import ru.practicum.error.exception.NotFoundException;
+import ru.practicum.exception.ForbiddenActionException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.events.EventsSortType;
 
 import java.time.LocalDateTime;

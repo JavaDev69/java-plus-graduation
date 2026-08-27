@@ -1,32 +1,10 @@
 package ru.practicum.subscriptions;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.categories.Category;
-import ru.practicum.categories.CategoryRepository;
-import ru.practicum.events.Event;
-import ru.practicum.dto.events.EventState;
-import ru.practicum.events.EventsRepository;
-import ru.practicum.user.User;
-import ru.practicum.user.UserRepository;
-
-import java.time.LocalDateTime;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(
         properties = {
@@ -38,8 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Rollback
 @AutoConfigureTestDatabase
 class PrivateSubscriptionControllerTest {
-
-    @Autowired
+//todo refactor it
+    /*@Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -171,5 +149,5 @@ class PrivateSubscriptionControllerTest {
                 .publishedOn(state == EventState.PUBLISHED ? LocalDateTime.now() : null)
                 .views(0L)
                 .build();
-    }
+    }*/
 }

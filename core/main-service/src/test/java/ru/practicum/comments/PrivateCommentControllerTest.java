@@ -102,7 +102,7 @@ class PrivateCommentControllerTest {
     @Test
     void getComment_notFound_shouldReturn404() throws Exception {
         when(commentService.getCommentById(999L))
-                .thenThrow(new ru.practicum.error.exception.NotFoundException("Not found"));
+                .thenThrow(new ru.practicum.exception.NotFoundException("Not found"));
 
         mockMvc.perform(get("/users/10/events/100/comments/999"))
                 .andExpect(status().isNotFound());

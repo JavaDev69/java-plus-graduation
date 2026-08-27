@@ -68,7 +68,7 @@ class CategoryControllerTest {
     @Test
     void getCategoryById_notFound_shouldReturn404() throws Exception {
         when(categoryService.getCategoryById(999L))
-                .thenThrow(new ru.practicum.error.exception.NotFoundException("Not found"));
+                .thenThrow(new ru.practicum.exception.NotFoundException("Not found"));
 
         mockMvc.perform(get("/categories/999"))
                 .andExpect(status().isNotFound());

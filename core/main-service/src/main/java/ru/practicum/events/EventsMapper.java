@@ -6,11 +6,11 @@ import ru.practicum.dto.events.EventShortDto;
 import ru.practicum.dto.events.EventState;
 import ru.practicum.dto.events.Location;
 import ru.practicum.dto.events.NewEventDto;
+import ru.practicum.dto.user.UserDto;
 import ru.practicum.events.moderation.ModerationComment;
-import ru.practicum.user.User;
-import ru.practicum.user.UserMapper;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static ru.practicum.categories.CategoryMapper.toCategoryDto;
 import static ru.practicum.common.Constance.FORMATTER;
@@ -25,7 +25,8 @@ public class EventsMapper {
         dto.setCategory(toCategoryDto(event.getCategory()));
         dto.setConfirmedRequests(confirmedRequests);
         dto.setEventDate(event.getEventDate().format(FORMATTER));
-        dto.setInitiator(new UserMapper().toShortDto(event.getInitiator()));
+        //todo fix it
+//        dto.setInitiator(new UserMapper().toShortDto(event.getInitiator()));
         dto.setPaid(event.getPaid());
         dto.setTitle(event.getTitle());
         dto.setViews(event.getViews());
@@ -53,7 +54,8 @@ public class EventsMapper {
         dto.setCreatedOn(format(event.getCreatedOn()));
         dto.setDescription(event.getDescription());
         dto.setEventDate(event.getEventDate().format(FORMATTER));
-        dto.setInitiator(new UserMapper().toShortDto(event.getInitiator()));
+        //todo fix it
+//        dto.setInitiator(new UserMapper().toShortDto(event.getInitiator()));
         dto.setLocation(new Location(event.getLocationLat(), event.getLocationLon()));
         dto.setPaid(event.getPaid());
         dto.setParticipantLimit(event.getParticipantLimit());
@@ -89,7 +91,7 @@ public class EventsMapper {
      * @param user пользователь-инициатор события
      * @return сущность Event, готовая для сохранения в БД
      */
-    public static Event toEvent(NewEventDto dto, User user, Category category) {
+    public static Event toEvent(NewEventDto dto, UserDto user, Category category) {
         return Event.builder()
                 .annotation(dto.getAnnotation())
                 .category(category)
@@ -101,9 +103,9 @@ public class EventsMapper {
                 .requestModeration(dto.getRequestModeration())
                 .locationLat(dto.getLocation().getLat())
                 .locationLon(dto.getLocation().getLon())
-                .createdOn(LocalDateTime.now())
+                .createdOn(LocalDateTime.now(ZoneId.systemDefault()))
                 .state(EventState.PENDING)
-                .initiator(user)
+                .initiatorId(user.getId())
                 .confirmedRequests(0L)
                 .views(0L)
                 .build();

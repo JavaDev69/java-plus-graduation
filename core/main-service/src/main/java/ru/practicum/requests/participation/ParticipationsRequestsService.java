@@ -4,20 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.error.exception.ConflictException;
-import ru.practicum.error.exception.NotFoundException;
-import ru.practicum.events.Event;
+import ru.practicum.client.UserClient;
 import ru.practicum.dto.events.EventState;
-import ru.practicum.events.EventsRepository;
 import ru.practicum.dto.request.ParticipationRequestDto;
+import ru.practicum.dto.user.UserDto;
+import ru.practicum.events.Event;
+import ru.practicum.events.EventsRepository;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.requests.ParticipationRequest;
 import ru.practicum.requests.RequestRepository;
 import ru.practicum.requests.RequestsMapper;
-import ru.practicum.user.User;
-import ru.practicum.user.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ru.practicum.common.Constance.FORMATTER;
@@ -28,27 +30,26 @@ import static ru.practicum.requests.RequestsMapper.toDto;
 @Slf4j
 public class ParticipationsRequestsService {
 
-    private UserRepository userRepository;
+    private final UserClient userClient;
     private EventsRepository eventsRepository;
     private RequestRepository requestRepository;
 
     @Transactional
     public ParticipationRequestDto createParticipationRequest(Long userId, Long eventId) {
         // 1. Проверяем существование пользователя
-        User requester = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
+        UserDto requester = userClient.getById(userId);
 
         // 2. Проверяем существование события
         Event event = eventsRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
 
         // 3. Проверяем, что пользователь не является инициатором события
-        if (event.getInitiator().getId().equals(userId)) {
+        if (Objects.equals(event.getInitiatorId(), requester.getId())) {
             throw new ConflictException("User cannot request participation in their own event");
         }
 
         // 4. Проверяем статус события — должно быть PUBLISHED
-        if (!event.getState().equals(EventState.PUBLISHED)) {
+        if (!EventState.PUBLISHED.equals(event.getState())) {
             throw new ConflictException("Cannot participate in unpublished event");
         }
 
@@ -69,8 +70,8 @@ public class ParticipationsRequestsService {
         // 7. Создаём заявку
         ParticipationRequest request = new ParticipationRequest();
         request.setEvent(event);
-        request.setRequester(requester);
-        request.setCreated(LocalDateTime.now());
+        request.setRequesterId(requester.getId());
+        request.setCreated(LocalDateTime.now(ZoneId.systemDefault()));
         log.info("Заявка при создании в методе {}", request);
 
         // 8. Устанавливаем статус с учётом лимита участников и настройки модерации
@@ -87,8 +88,9 @@ public class ParticipationsRequestsService {
 
         ParticipationRequest savedRequest = requestRepository.save(request);
 
-        savedRequest.setRequester(requester);
-        savedRequest.setEvent(event);
+        //todo WTF ???
+//        savedRequest.setRequesterId(requester.getId());
+//        savedRequest.setEvent(event);
         log.debug("Дата создания в БД (после сохранения): {}\nСтроковое представление даты в DTO: {}",
                 request.getCreated(), savedRequest.getCreated().format(FORMATTER));
 
@@ -104,7 +106,7 @@ public class ParticipationsRequestsService {
                 .orElseThrow(() -> new NotFoundException("Request with id=" + requestId + " was not found"));
 
         // 2. Проверяем, что запрос принадлежит пользователю
-        if (!request.getRequester().getId().equals(userId)) {
+        if (!request.getRequesterId().equals(userId)) {
             throw new NotFoundException("Request with id=" + requestId + " is not accessible for user " + userId);
         }
 
@@ -127,11 +129,10 @@ public class ParticipationsRequestsService {
 
     public List<ParticipationRequestDto> getUserParticipationRequests(Long userId) {
         // 1. Проверяем существование пользователя
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
+        UserDto user = userClient.getById(userId);
 
         // 2. Получаем все заявки пользователя
-        List<ParticipationRequest> requests = requestRepository.findByRequesterId(userId);
+        List<ParticipationRequest> requests = requestRepository.findByRequesterId(user.getId());
 
         // 3. Преобразуем в DTO
         return requests.stream()

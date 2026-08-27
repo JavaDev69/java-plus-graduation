@@ -7,10 +7,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
 
-    boolean existsBySubscriber_IdAndPublisher_Id(Long subscriberId, Long publisherId);
+    boolean existsBySubscriberIdAndPublisherId(Long subscriberId, Long publisherId);
 
     @Modifying
-    @Query("DELETE FROM Subscription s WHERE s.subscriber.id = :subscriberId AND s.publisher.id = :publisherId")
+    @Query("DELETE FROM Subscription s WHERE s.subscriberId = :subscriberId AND s.publisherId = :publisherId")
     int deleteBySubscriberIdAndPublisherId(
             @Param("subscriberId") Long subscriberId,
             @Param("publisherId") Long publisherId);
