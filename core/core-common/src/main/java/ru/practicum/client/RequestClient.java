@@ -12,7 +12,7 @@ import ru.practicum.operations.RequestOperation;
  */
 @FeignClient(
         name = "request-service",
-        path = "/users/{userId}/events/{eventId}/requests",
+        path = "/requests",
         configuration = FeignClientConfig.class)
 public interface RequestClient extends RequestOperation {
 }
