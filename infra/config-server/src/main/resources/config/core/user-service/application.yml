@@ -12,7 +12,7 @@ spring:
         format_sql: true
   sql:
     init:
-      mode: never
+      mode: always
 
   datasource:
     driver-class-name: org.postgresql.Driver
