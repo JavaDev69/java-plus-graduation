@@ -60,7 +60,7 @@ public class EventsMapper {
         dto.setParticipantLimit(event.getParticipantLimit());
         dto.setPublishedOn(event.getPublishedOn() != null ? format(event.getPublishedOn()) : null);
         dto.setRequestModeration(event.getRequestModeration());
-        dto.setState(event.getState().name());
+        dto.setState(event.getState());
         dto.setTitle(event.getTitle());
         dto.setViews(event.getViews());
         return dto;

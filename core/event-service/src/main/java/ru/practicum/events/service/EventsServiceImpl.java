@@ -197,7 +197,7 @@ public class EventsServiceImpl implements EventsService {
         List<Predicate> predicates = new ArrayList<>();
 
         if (userIds != null && !userIds.isEmpty()) {
-            predicates.add(root.get("initiatorId").get("id").in(userIds));
+            predicates.add(root.get("initiatorId").in(userIds));
         }
 
         if (states != null && !states.isEmpty()) {

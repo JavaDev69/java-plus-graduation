@@ -48,6 +48,7 @@ public class ParticipationsRequestsService {
         }
 
         EventFullDto event = eventById.getBody();
+        log.info("Получили событие: {}", event);
 
         // 3. Проверяем, что пользователь не является инициатором события
         if (Objects.equals(event.getInitiator().getId(), requester.getId())) {

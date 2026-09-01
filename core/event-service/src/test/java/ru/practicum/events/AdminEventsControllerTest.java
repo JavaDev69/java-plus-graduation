@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.dto.events.EventFullDto;
+import ru.practicum.dto.events.EventState;
 import ru.practicum.dto.events.StateAction;
 import ru.practicum.dto.events.UpdateEventAdminRequest;
 import ru.practicum.events.controller.AdminEventsController;
@@ -46,7 +47,7 @@ class AdminEventsControllerTest {
         event.setAnnotation("conf");
         event.setEventDate(String.valueOf(LocalDateTime.now().plusDays(7)));
         event.setPaid(true);
-        event.setState("PUBLISHED");
+        event.setState(EventState.PUBLISHED);
         event.setViews(150L);
 
         when(adminEventService.getEvents(
@@ -77,7 +78,7 @@ class AdminEventsControllerTest {
         EventFullDto updatedEvent = new EventFullDto();
         updatedEvent.setId(1L);
         updatedEvent.setTitle("Updated Conference");
-        updatedEvent.setState("PUBLISHED");
+        updatedEvent.setState(EventState.PUBLISHED);
 
         when(adminEventService.updateEventByAdmin(1L, request)).thenReturn(updatedEvent);
 
