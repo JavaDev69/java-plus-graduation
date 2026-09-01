@@ -70,8 +70,8 @@ services:
     networks:
       - ewm-net
 
-  ewm-service:
-    build: ./core/main-service
+  user-service:
+    build: ./core/user-service
     environment:
       APP_PORT: 0
       DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_db
@@ -81,38 +81,159 @@ services:
       EUREKA_HOSTNAME: discovery-server
       EUREKA_PORT: 8761
     depends_on:
+      ewm-db:
+        condition: service_healthy
       config-server:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
-      ewm-db:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "true" ]
-      interval: 24h
-      start_period: 10s
-      start_interval: 10s
     restart: unless-stopped
     networks:
       - ewm-net
 
-  user-service:
-    build: ./core/user-service
+  request-service:
+    build: ./core/request-service
     environment:
       APP_PORT: 0
       DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_db
       DATASOURCE_USERNAME: dbuser
       DATASOURCE_PASSWORD: 12345
+      STATS_SERVER_URL: http://stats-server:9090
       EUREKA_HOSTNAME: discovery-server
       EUREKA_PORT: 8761
     depends_on:
-      ewm-service:
+      ewm-db:
         condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "true" ]
-      interval: 24h
-      start_period: 10s
-      start_interval: 10s
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ewm-net
+
+  event-service:
+    build: ./core/event-service
+    environment:
+      APP_PORT: 0
+      DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_db
+      DATASOURCE_USERNAME: dbuser
+      DATASOURCE_PASSWORD: 12345
+      STATS_SERVER_URL: http://stats-server:9090
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ewm-net
+
+  category-service:
+    build: ./core/category-service
+    environment:
+      APP_PORT: 0
+      DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_db
+      DATASOURCE_USERNAME: dbuser
+      DATASOURCE_PASSWORD: 12345
+      STATS_SERVER_URL: http://stats-server:9090
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ewm-net
+
+  rating-service:
+    build: ./core/rating-service
+    environment:
+      APP_PORT: 0
+      DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_db
+      DATASOURCE_USERNAME: dbuser
+      DATASOURCE_PASSWORD: 12345
+      STATS_SERVER_URL: http://stats-server:9090
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ewm-net
+
+  subscription-service:
+    build: ./core/subscription-service
+    environment:
+      APP_PORT: 0
+      DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_db
+      DATASOURCE_USERNAME: dbuser
+      DATASOURCE_PASSWORD: 12345
+      STATS_SERVER_URL: http://stats-server:9090
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ewm-net
+
+  compilation-service:
+    build: ./core/compilation-service
+    environment:
+      APP_PORT: 0
+      DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_db
+      DATASOURCE_USERNAME: dbuser
+      DATASOURCE_PASSWORD: 12345
+      STATS_SERVER_URL: http://stats-server:9090
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ewm-net
+
+  comment-service:
+    build: ./core/comment-service
+    environment:
+      APP_PORT: 0
+      DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_db
+      DATASOURCE_USERNAME: dbuser
+      DATASOURCE_PASSWORD: 12345
+      STATS_SERVER_URL: http://stats-server:9090
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - ewm-net

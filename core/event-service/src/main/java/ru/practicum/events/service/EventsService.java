@@ -1,0 +1,82 @@
+package ru.practicum.events.service;
+
+import org.springframework.data.domain.PageRequest;
+import ru.practicum.dto.events.EventFullDto;
+import ru.practicum.dto.events.EventShortDto;
+import ru.practicum.dto.events.EventState;
+import ru.practicum.dto.events.NewEventDto;
+import ru.practicum.dto.events.UpdateEventAdminRequest;
+import ru.practicum.dto.events.UpdateEventUserRequest;
+import ru.practicum.exception.ForbiddenActionException;
+import ru.practicum.exception.NotFoundException;
+import ru.practicum.events.dal.model.EventsSortType;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public interface EventsService {
+
+    List<EventShortDto> getPublishedEvents(
+            String text,
+            List<Long> categoryIds,
+            Boolean paid,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            Boolean onlyAvailable,
+            EventsSortType sort,
+            int from,
+            int size
+    );
+
+    EventFullDto getPublishedEventById(Long id);
+
+    List<EventShortDto> getShortEventByIds(List<Long> ids);
+
+    List<EventFullDto> getEvents(
+            List<Long> userIds,
+            List<String> states,
+            List<Long> categoryIds,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            int from,
+            int size
+    );
+
+    EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest request);
+
+    /**
+     * Сохраняет новое событие, инициированное пользователем.
+     *
+     * @param newEventDto DTO с данными нового события
+     * @param userId      ID пользователя, создающего событие
+     * @return DTO полного представления сохранённого события
+     */
+    EventFullDto saveEvent(NewEventDto newEventDto, Long userId);
+
+
+    /**
+     * Обновляет данные события, если оно находится в состоянии «отменено» или «ожидает модерации».
+     *
+     * @param userId                 ID пользователя, инициирующего обновление
+     * @param eventId                ID события, которое требуется обновить
+     * @param updateEventUserRequest DTO с данными для обновления события (поля могут быть null)
+     * @return DTO полного представления обновлённого события
+     * @throws NotFoundException        если событие с указанным ID не найдено
+     * @throws ForbiddenActionException если обновление запрещено (неверный статус или дата слишком ранняя)
+     */
+    EventFullDto updateInactiveEvent(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest);
+
+    List<EventFullDto> getUserEvents(Long userId, int from, int size);
+
+    List<EventFullDto> getUserModerationHistory(Long userId, int from, int size);
+
+    EventFullDto getUserEventById(Long userId, Long eventId);
+
+    List<EventFullDto> getEventsForModeration(int from, int size);
+
+    List<EventShortDto> findActualPublishedEventsBySubscriberId(Long id,
+                                                                List<Long> publisherIds,
+                                                                EventState state,
+                                                                LocalDateTime time,
+                                                                PageRequest pageRequest);
+}
