@@ -25,5 +25,5 @@ public interface CategoryOperation {
     ResponseEntity<CategoryDto> getCategoryById(@PathVariable Long catId);
 
     @GetMapping("/byIds")
-    ResponseEntity<List<CategoryDto>> getCategoriesByIds(@RequestBody List<Long> catIds);
+    ResponseEntity<List<CategoryDto>> getCategoriesByIds(@RequestParam List<Long> catIds);
 }

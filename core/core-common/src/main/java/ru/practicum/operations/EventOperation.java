@@ -66,7 +66,7 @@ public interface EventOperation {
     ResponseEntity<EventFullDto> getEventById(@PathVariable Long id);
 
     @GetMapping("/short/byIds")
-    ResponseEntity<List<EventShortDto>> getEventByIds(@RequestBody List<Long> ids);
+    ResponseEntity<List<EventShortDto>> getEventByIds(@RequestParam List<Long> ids);
 
     @GetMapping("/subscriber/{id}")
     List<EventShortDto> getActualPublishedEventsBySubscriberId(

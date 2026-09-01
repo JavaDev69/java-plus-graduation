@@ -31,6 +31,6 @@ public interface RequestOperation {
 
     @GetMapping
     Map<Long,Long> countRequestsByEventIdsAndStatus(
-            @RequestBody @NotEmpty List<Long> eventIds,
+            @RequestParam @NotEmpty List<Long> eventIds,
             @RequestParam EventState state);
 }
