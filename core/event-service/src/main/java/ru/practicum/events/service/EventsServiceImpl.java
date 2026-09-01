@@ -197,7 +197,7 @@ public class EventsServiceImpl implements EventsService {
         List<Predicate> predicates = new ArrayList<>();
 
         if (userIds != null && !userIds.isEmpty()) {
-            predicates.add(root.get("initiator").get("id").in(userIds));
+            predicates.add(root.get("initiatorId").get("id").in(userIds));
         }
 
         if (states != null && !states.isEmpty()) {
@@ -208,7 +208,7 @@ public class EventsServiceImpl implements EventsService {
         }
 
         if (categoryIds != null && !categoryIds.isEmpty()) {
-            predicates.add(root.get("category").get("id").in(categoryIds));
+            predicates.add(root.get("categoryId").in(categoryIds));
         }
 
         if (rangeStart != null) {
