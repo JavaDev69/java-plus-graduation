@@ -4,7 +4,7 @@ server:
 spring:
   cloud:
     gateway:
-      discovery.locator.enabled: true
+#      discovery.locator.enabled: true
       routes:
 #comment-service
         - id: main_admin_comments_route
@@ -59,6 +59,16 @@ spring:
           predicates:
             - Path=/categories/**
             - Method=GET
+#event-service
+        - id: main_admin_events_route
+          uri: lb://event-service
+          predicates:
+            - Path=/admin/events/**
+            - Method=GET,PATCH
+        - id: main_events_route
+          uri: lb://event-service
+          predicates:
+            - Path=/events/**,/users/{userId}/events/**
 #user-service
         - id: main_users_route
           uri: lb://user-service
@@ -70,22 +80,6 @@ spring:
           predicates:
             - Path=/admin/users/**
             - Method=GET,POST,DELETE
-#event-service
-        - id: main_admin_events_route
-          uri: lb://event-service
-          predicates:
-            - Path=/admin/events/**
-            - Method=GET,PATCH
-        - id: main_events_route
-          uri: lb://event-service
-          predicates:
-            - Path=/events/**
-            - Method=GET
-        - id: main_events_route
-          uri: lb://event-service
-          predicates:
-            - Path=/users/{userId}/events/**
-
 
 logging:
   level:
