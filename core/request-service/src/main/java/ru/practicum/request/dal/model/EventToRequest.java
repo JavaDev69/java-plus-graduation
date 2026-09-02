@@ -7,5 +7,6 @@ package ru.practicum.request.dal.model;
  */
 public interface EventToRequest {
     Long getEventId();
+
     Long getCount();
 }

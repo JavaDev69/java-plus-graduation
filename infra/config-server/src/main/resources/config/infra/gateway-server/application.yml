@@ -10,12 +10,12 @@ spring:
         - id: main_admin_comments_route
           uri: lb://comment-service
           predicates:
-            - Path=/admin/comments/**,/users/{userId}/events/{eventId}/comments
+            - Path=/admin/comments/**,/users/{userId}/events/{eventId}/comments/**
 #request-service
         - id: request_route
           uri: lb://request-service
           predicates:
-            - Path=/requests/**,/users/{userId}/events/{eventId}/requests,/users/{userId}/requests
+            - Path=/requests/**,/users/{userId}/events/{eventId}/requests,/users/{userId}/requests/**
 #rate-service
         - id: rating_route
           uri: lb://rating-service

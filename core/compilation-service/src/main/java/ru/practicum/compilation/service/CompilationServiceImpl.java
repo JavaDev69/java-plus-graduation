@@ -165,12 +165,20 @@ public class CompilationServiceImpl implements CompilationService {
 
         if (!eventIds.isEmpty()) {
             ResponseEntity<List<EventShortDto>> eventByIds = eventClient.getEventByIds(eventIds);
-            if (eventByIds.getBody() == null || eventByIds.getBody().isEmpty()) {
+            List<EventShortDto> eventShortDtos = eventByIds.getBody();
+            if (eventShortDtos == null || eventShortDtos.isEmpty()) {
                 throw new IllegalStateException("Ошибка получения событий");
             }
 
+
             return compilations.stream()
-                    .map(comp -> CompilationMapper.toCompilationDto(comp, eventByIds.getBody()))
+                    .map(comp -> {
+
+                        var events = eventShortDtos.stream()
+                                .filter(e -> comp.getEventIds().contains(e.getId()))
+                                .toList();
+                        return CompilationMapper.toCompilationDto(comp, events);
+                    })
                     .toList();
         }
 

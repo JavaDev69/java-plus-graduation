@@ -1,9 +1,9 @@
 package ru.practicum.operations;
 
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.dto.categories.CategoryDto;
 
@@ -25,5 +25,5 @@ public interface CategoryOperation {
     ResponseEntity<CategoryDto> getCategoryById(@PathVariable Long catId);
 
     @GetMapping("/byIds")
-    ResponseEntity<List<CategoryDto>> getCategoriesByIds(@RequestParam List<Long> catIds);
+    ResponseEntity<List<CategoryDto>> getCategoriesByIds(@RequestParam @NotEmpty List<Long> catIds);
 }

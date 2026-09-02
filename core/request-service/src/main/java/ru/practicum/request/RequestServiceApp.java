@@ -17,7 +17,7 @@ import ru.practicum.client.UserClient;
         UserClient.class
 })
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"ru.practicum.request","ru.practicum.error"})
 public class RequestServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(RequestServiceApp.class, args);

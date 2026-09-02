@@ -1,19 +1,21 @@
 package ru.practicum.category.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.dal.model.Category;
-import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.dal.repository.CategoryRepository;
+import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.dto.categories.CategoryDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -27,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
         PageRequest page = PageRequest.of(from / size, size);
         return categoryRepository.findAll(page).stream()
                 .map(CategoryMapper::toCategoryDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -83,5 +85,20 @@ public class CategoryServiceImpl implements CategoryService {
         if (deletedCount == 0) {
             throw new ConflictException("Category is used by events and cannot be deleted");
         }
+    }
+
+    @Override
+    public List<CategoryDto> getCategoryByIds(List<Long> catIds) {
+        List<Category> allById = categoryRepository.findAllById(catIds);
+        List<Long> findedIds = allById.stream().map(Category::getId).distinct().toList();
+
+        HashSet<Long> ids = new HashSet<>(catIds);
+        if (!ids.containsAll(findedIds)) {
+            findedIds.forEach(ids::remove);
+            log.warn("Не удалось найти категории для следующих id:{}",ids);
+        }
+        return allById.stream()
+                .map(CategoryMapper::toCategoryDto)
+                .toList();
     }
 }

@@ -15,7 +15,7 @@ public interface RateRepository extends JpaRepository<Rate, Long> {
 
     Optional<Rate> findByEventIdAndUserId(Long eventId, Long userId);
 
-    @Query("SELECT r.eventId, " +
+    @Query("SELECT r.eventId AS eventId, " +
             "SUM(CASE WHEN r.isLike = true THEN 1 ELSE -1 END) AS rating " +
             "FROM Rate r " +
             "WHERE r.eventId IN :eventIds " +

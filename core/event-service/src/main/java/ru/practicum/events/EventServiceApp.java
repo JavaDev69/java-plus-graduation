@@ -22,7 +22,7 @@ import ru.practicum.client.UserClient;
         RateClient.class
 })
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"ru.practicum.events","ru.practicum.error"})
 public class EventServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(EventServiceApp.class, args);

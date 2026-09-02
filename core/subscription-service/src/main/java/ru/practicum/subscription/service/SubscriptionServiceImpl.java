@@ -2,7 +2,6 @@ package ru.practicum.subscription.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.EventClient;
@@ -18,9 +17,7 @@ import ru.practicum.subscription.dal.repository.SubscriptionRepository;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -79,19 +76,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 publisherIds,
                 EventState.PUBLISHED,
                 LocalDateTime.now(ZoneId.systemDefault()),
-                PageRequest.of(from / size, size)
+                from,
+                size
         );
-    }
-
-    private Map<Long, Long> getConfirmedRequests(List<EventShortDto> events) {
-        if (events.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        List<Long> eventIds = events.stream()
-                .map(EventShortDto::getId)
-                .toList();
-
-        return requestClient.countRequestsByEventIdsAndStatus(eventIds, EventState.CONFIRMED);
     }
 }

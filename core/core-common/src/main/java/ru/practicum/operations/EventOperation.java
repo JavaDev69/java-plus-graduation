@@ -1,17 +1,14 @@
 package ru.practicum.operations;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.dto.events.EventFullDto;
 import ru.practicum.dto.events.EventShortDto;
@@ -63,16 +60,28 @@ public interface EventOperation {
     );
 
     @GetMapping("/{id}")
-    ResponseEntity<EventFullDto> getEventById(@PathVariable Long id);
+    ResponseEntity<EventFullDto> getPublishedEventById(@PathVariable @Positive Long id);
+
+    @GetMapping("/full/{id}")
+    ResponseEntity<EventFullDto> getEventById(@PathVariable @Positive Long id);
 
     @GetMapping("/short/byIds")
     ResponseEntity<List<EventShortDto>> getEventByIds(@RequestParam List<Long> ids);
 
     @GetMapping("/subscriber/{id}")
     List<EventShortDto> getActualPublishedEventsBySubscriberId(
-            @PathVariable Long id,
+            @PathVariable @Positive Long id,
             @RequestParam List<Long> publisherIds,
             @RequestParam EventState state,
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
             @RequestParam LocalDateTime time,
-            @RequestParam PageRequest pageRequest);
+
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "From must be greater than or equal to 0")
+            Integer from,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "Size must be greater than 0")
+            @Max(value = 1000, message = "Size must be less than or equal to 1000")
+            Integer size);
 }

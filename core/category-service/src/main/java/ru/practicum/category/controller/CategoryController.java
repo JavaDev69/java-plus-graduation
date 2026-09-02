@@ -2,6 +2,7 @@ package ru.practicum.category.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.category.service.CategoryService;
 import ru.practicum.dto.categories.CategoryDto;
@@ -9,6 +10,7 @@ import ru.practicum.operations.CategoryOperation;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/categories")
 @RequiredArgsConstructor
@@ -30,6 +32,8 @@ public class CategoryController implements CategoryOperation {
 
     @Override
     public ResponseEntity<List<CategoryDto>> getCategoriesByIds(List<Long> catIds) {
-        return null;
+        List<CategoryDto> categories = categoryService.getCategoryByIds(catIds);
+
+        return ResponseEntity.ok(categories);
     }
 }

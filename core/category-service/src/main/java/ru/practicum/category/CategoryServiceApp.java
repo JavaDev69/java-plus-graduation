@@ -10,7 +10,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  * @project java-plus-graduation
  */
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"ru.practicum.category","ru.practicum.error"})
 public class CategoryServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(CategoryServiceApp.class, args);

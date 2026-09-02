@@ -17,7 +17,7 @@ import ru.practicum.client.UserClient;
         EventClient.class
 })
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"ru.practicum.comment","ru.practicum.error"})
 public class CommentServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(CommentServiceApp.class, args);

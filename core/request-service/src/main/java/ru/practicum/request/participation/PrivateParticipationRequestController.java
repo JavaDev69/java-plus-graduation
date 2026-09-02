@@ -36,8 +36,7 @@ public class PrivateParticipationRequestController {
             @PathVariable Long userId,
             @PathVariable Long requestId) {
 
-        ParticipationRequestDto cancelledRequest = participationsRequestsService.cancelParticipationRequest(userId, requestId);
-        return cancelledRequest;
+        return participationsRequestsService.cancelParticipationRequest(userId, requestId);
     }
 
     @GetMapping

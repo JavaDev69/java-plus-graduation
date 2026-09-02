@@ -21,7 +21,7 @@ import ru.practicum.client.RequestClient;
         StatsClient.class
 })
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"ru.practicum.compilation","ru.practicum.error"})
 public class CompilationServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(CompilationServiceApp.class, args);

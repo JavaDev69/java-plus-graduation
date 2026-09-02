@@ -7,7 +7,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.practicum.StatsClient;
@@ -54,10 +53,18 @@ public class PublicEventsController implements EventOperation {
     }
 
     @Override
-    public ResponseEntity<EventFullDto> getEventById(Long id) {
+    public ResponseEntity<EventFullDto> getPublishedEventById(Long id) {
         saveHitInfo();
 
         EventFullDto event = eventService.getPublishedEventById(id);
+        return ResponseEntity.ok(event);
+    }
+
+    @Override
+    public ResponseEntity<EventFullDto> getEventById(Long id) {
+        saveHitInfo();
+
+        EventFullDto event = eventService.getEventById(id);
         return ResponseEntity.ok(event);
     }
 
@@ -68,7 +75,7 @@ public class PublicEventsController implements EventOperation {
     }
 
     private void saveHitInfo() {
-        ServletRequestAttributes requestAttributes =(ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = requestAttributes.getRequest();
 
         EndpointHit hit = EndpointHit.builder()
@@ -81,7 +88,13 @@ public class PublicEventsController implements EventOperation {
     }
 
     @Override
-    public List<EventShortDto> getActualPublishedEventsBySubscriberId(Long id, List<Long> publisherIds,EventState state, LocalDateTime time, PageRequest pageRequest) {
-        return eventService.findActualPublishedEventsBySubscriberId(id,publisherIds,state,time,pageRequest);
+    public List<EventShortDto> getActualPublishedEventsBySubscriberId(Long id,
+                                                                      List<Long> publisherIds,
+                                                                      EventState state,
+                                                                      LocalDateTime time,
+                                                                      Integer from,
+                                                                      Integer size) {
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        return eventService.findActualPublishedEventsBySubscriberId(id, publisherIds, state, time, pageRequest);
     }
 }

@@ -14,10 +14,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.FieldNameConstants;
 import ru.practicum.dto.events.EventState;
 
 import java.time.LocalDateTime;
 
+@FieldNameConstants
 @Entity
 @Table(name = "events")
 @Getter

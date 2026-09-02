@@ -44,6 +44,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -101,7 +102,9 @@ public class EventsServiceImpl implements EventsService {
                 .and(EventSpecification.isWithinRange(rangeStart, rangeEnd));
 
         List<Event> events = eventRepository.findAll(spec, pageable).getContent();
-
+        if (events.isEmpty()) {
+            return emptyList();
+        }
         if (Boolean.TRUE.equals(onlyAvailable)) {
             events.removeIf(event -> event.getParticipantLimit() > 0 &&
                     event.getConfirmedRequests() >= event.getParticipantLimit());
@@ -113,26 +116,37 @@ public class EventsServiceImpl implements EventsService {
 
         Map<Long, Long> requestCounts = getRequestCounts(events.stream().map(Event::getId).toList());
         Map<Long, Long> ratingsMap = getRatingsMap(events);
-        ResponseEntity<List<CategoryDto>> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds);
-        Map<Long, CategoryDto> idToCategory = categoriesByIds.getBody() == null ?
-                emptyMap() : categoriesByIds.getBody().stream().collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
 
+        Map<Long, CategoryDto> idToCategory = new HashMap<>();
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            log.info("Отправляем запрос на получение категорий для ids: {}",categoryIds);
+            List<CategoryDto> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds).getBody();
+            if (categoriesByIds != null) {
+                idToCategory.putAll(
+                        categoriesByIds.stream()
+                                .collect(Collectors.toMap(CategoryDto::getId, Function.identity())));
+            }
+        }
         List<EventShortDto> dtoList = events.stream()
                 .map(event ->
                         toShortEventDto(
                                 event,
-                                event.getCategoryId() == null ? null : idToCategory.get(event.getCategoryId()),
+                                idToCategory.get(event.getCategoryId()),
                                 users.get(event.getInitiatorId()),
                                 requestCounts.getOrDefault(event.getId(), 0L),
                                 ratingsMap.getOrDefault(event.getId(), 0L))
                 )
                 .collect(Collectors.toList());
 
+        log.info("Список событий до сортировки: {}", dtoList);
         if (sort == EventsSortType.VIEWS) {
-            dtoList.sort((e1, e2) -> Long.compare(e2.getViews(), e1.getViews()));
+            dtoList.sort((e1, e2) ->
+                    Long.compare(e2.getViews(), e1.getViews()));
         } else if (sort == EventsSortType.RATING) {
-            dtoList.sort((e1, e2) -> Long.compare(e2.getRating(), e1.getRating()));
+            dtoList.sort((e1, e2) ->
+                    Long.compare(e2.getRating(), e1.getRating()));
         }
+        log.info("Список событий после сортировки: {}", dtoList);
 
         return dtoList;
     }
@@ -197,29 +211,29 @@ public class EventsServiceImpl implements EventsService {
         List<Predicate> predicates = new ArrayList<>();
 
         if (userIds != null && !userIds.isEmpty()) {
-            predicates.add(root.get("initiatorId").in(userIds));
+            predicates.add(root.get(Event.Fields.initiatorId).in(userIds));
         }
 
         if (states != null && !states.isEmpty()) {
             List<EventState> stateEnums = states.stream()
                     .map(EventState::valueOf)
                     .toList();
-            predicates.add(root.get("state").in(stateEnums));
+            predicates.add(root.get(Event.Fields.state).in(stateEnums));
         }
 
         if (categoryIds != null && !categoryIds.isEmpty()) {
-            predicates.add(root.get("categoryId").in(categoryIds));
+            predicates.add(root.get(Event.Fields.categoryId).in(categoryIds));
         }
 
         if (rangeStart != null) {
-            predicates.add(cb.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
+            predicates.add(cb.greaterThanOrEqualTo(root.get(Event.Fields.eventDate), rangeStart));
         }
         if (rangeEnd != null) {
-            predicates.add(cb.lessThanOrEqualTo(root.get("eventDate"), rangeEnd));
+            predicates.add(cb.lessThanOrEqualTo(root.get(Event.Fields.eventDate), rangeEnd));
         }
 
         query.select(root).where(predicates.toArray(new Predicate[0]));
-        query.orderBy(cb.desc(root.get("eventDate")));
+        query.orderBy(cb.desc(root.get(Event.Fields.eventDate)));
 
         PageRequest pageRequest = PageRequest.of(from / size, size);
         List<Event> events = entityManager.createQuery(query)
@@ -231,7 +245,10 @@ public class EventsServiceImpl implements EventsService {
         Map<Long, Long> ratings = getRatingsMap(events);
         setViewsToEvents(events);
 
-        ResponseEntity<List<CategoryDto>> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds);
+        List<Long> categoryIdsFromEvent = events.stream().map(Event::getCategoryId).distinct().toList();
+        log.info("Список ID категорий событий: {}", categoryIdsFromEvent);
+        ResponseEntity<List<CategoryDto>> categoriesByIds = categoryClient.getCategoriesByIds(categoryIdsFromEvent);
+        log.info("Получены категории: {}", categoriesByIds.getBody());
         Map<Long, CategoryDto> idToCategory = categoriesByIds.getBody() == null ?
                 emptyMap() : categoriesByIds.getBody().stream().collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
 
@@ -247,7 +264,7 @@ public class EventsServiceImpl implements EventsService {
                         users.get(event.getInitiatorId()),
                         ratings.getOrDefault(event.getId(), 0L))
                 )
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -409,7 +426,7 @@ public class EventsServiceImpl implements EventsService {
                         user,
                         ratings.getOrDefault(event.getId(), 0L))
                 )
-                .collect(Collectors.toList());
+                .toList();
 
         log.info("Найдено {} событий для пользователя с ID {}", events.size(), userId);
         return eventFullDtos;
@@ -489,20 +506,24 @@ public class EventsServiceImpl implements EventsService {
 
     private void setViewsToEvents(List<Event> events) {
         if (events.isEmpty()) return;
-        List<String> uris = events.stream().map(e -> "/events/" + e.getId()).collect(Collectors.toList());
+        List<String> uris = events.stream().map(e -> "/events/" + e.getId()).toList();
         List<ViewStats> stats = getStats(uris);
         Map<String, Long> viewsMap = stats.stream().collect(Collectors.toMap(ViewStats::getUri, ViewStats::getHits));
         events.forEach(e -> e.setViews(viewsMap.getOrDefault("/events/" + e.getId(), 0L)));
     }
 
     private Map<Long, Long> getRequestCounts(List<Long> eventIds) {
-        return requestClient.countRequestsByEventIdsAndStatus(eventIds, EventState.CONFIRMED);
+        Map<Long, Long> requestIdToCount = requestClient.countRequestsByEventIdsAndStatus(eventIds, EventState.CONFIRMED);
+        log.info("Получен список requestIdToCount: {}", requestIdToCount);
+        return requestIdToCount;
     }
 
     private Map<Long, Long> getRatingsMap(List<Event> events) {
         if (events.isEmpty()) return emptyMap();
         List<Long> eventIds = events.stream().map(Event::getId).toList();
-        return rateClient.getRatingByEventIds(eventIds);
+        Map<Long, Long> eventIdToRating = rateClient.getRatingByEventIds(eventIds);
+        log.info("Получен список eventIdToRating: {}", eventIdToRating);
+        return eventIdToRating;
     }
 
     private <T extends UpdateEventRequest> void applyNonNullUpdates(Event event, T request) {
@@ -538,7 +559,7 @@ public class EventsServiceImpl implements EventsService {
         if (!eventList.isEmpty()) {
             List<Long> eventIds = eventList.stream()
                     .map(Event::getId)
-                    .collect(Collectors.toList());
+                    .toList();
 
             // Получаем последние комментарии модерации для событий
             List<ModerationComment> moderationComments = moderationCommentRepository.findLastCommentsByEventIds(eventIds);
@@ -567,7 +588,7 @@ public class EventsServiceImpl implements EventsService {
                                 users.get(event.getInitiatorId()),
                                 comment);
                     })
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         return fullEventDtos;
@@ -595,7 +616,7 @@ public class EventsServiceImpl implements EventsService {
                         event.getCategoryId() == null ? null : idToCategory.get(event.getCategoryId()),
                         users.get(event.getInitiatorId())
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -624,5 +645,21 @@ public class EventsServiceImpl implements EventsService {
                         requestCounts.getOrDefault(event.getId(), 0L),
                         ratingsMap.getOrDefault(event.getId(), 0L)))
                 .toList();
+    }
+
+    @Override
+    public EventFullDto getEventById(Long id) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Event with id=" + id + " was not found"));
+
+        Map<Long, Long> eventToRequest =
+                requestClient.countRequestsByEventIdsAndStatus(singletonList(event.getId()), EventState.CONFIRMED);
+
+        event.setConfirmedRequests(eventToRequest.getOrDefault(event.getId(), 0L));
+        setViewsToEvents(List.of(event));
+        Long rating = rateClient.getRatingByEventId(id);
+        UserDto user = userClient.getById(event.getInitiatorId());
+        CategoryDto category = event.getCategoryId() == null ? null : findCategoryById(event.getCategoryId());
+        return toEventFullDto(event, category, user, rating);
     }
 }

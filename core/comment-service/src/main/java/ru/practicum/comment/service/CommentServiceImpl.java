@@ -22,6 +22,7 @@ import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.exception.NotFoundException;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -41,7 +42,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto addComment(Long userId, Long eventId, NewCommentDto dto) {
         UserDto author = userClient.getById(userId);
-        ResponseEntity<EventFullDto> eventById = eventClient.getEventById(eventId);
+        ResponseEntity<EventFullDto> eventById = eventClient.getPublishedEventById(eventId);
         if (eventById.getBody() == null) {
             throw new NotFoundException("Событие с ID " + eventId + " не найдено");
         }
@@ -68,8 +69,11 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> getCommentsByEventId(Long eventId, Integer from, Integer size) {
         PageRequest page = PageRequest.of(from / size, size);
         List<Comment> byEventIdAndStatus = commentRepository.findByEventIdAndStatus(eventId, CommentStatus.APPROVED, page);
-
+        if(byEventIdAndStatus.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<Long> authorIds = byEventIdAndStatus.stream().map(Comment::getAuthorId).distinct().toList();
+        log.info("Список id авторов для получения UserDto: {}", authorIds);
         List<UserDto> userDtos = userClient.get(authorIds, 0, authorIds.size());
         Map<Long, UserDto> users = userDtos.stream().collect(Collectors.toMap(UserShortDto::getId,Function.identity()));
 

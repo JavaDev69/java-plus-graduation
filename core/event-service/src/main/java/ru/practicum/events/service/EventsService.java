@@ -79,4 +79,6 @@ public interface EventsService {
                                                                 EventState state,
                                                                 LocalDateTime time,
                                                                 PageRequest pageRequest);
+
+    EventFullDto getEventById(Long id);
 }
