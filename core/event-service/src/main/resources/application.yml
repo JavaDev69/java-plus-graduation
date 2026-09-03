@@ -13,6 +13,7 @@ spring:
         max-interval: 20000
         initial-interval: 2000
       fail-fast: true
+      request-connect-timeout: 15000
 
 eureka:
   instance:

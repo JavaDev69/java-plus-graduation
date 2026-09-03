@@ -13,6 +13,7 @@ spring:
         use-random-policy: true
         max-interval: 20000
         initial-interval: 2000
+      request-connect-timeout: 15000
 
 eureka:
   instance:
