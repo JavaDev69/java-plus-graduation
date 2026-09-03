@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.EventClient;
-import ru.practicum.client.RequestClient;
 import ru.practicum.client.UserClient;
 import ru.practicum.dto.events.EventShortDto;
 import ru.practicum.dto.events.EventState;
@@ -27,7 +26,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserClient userClient;
     private final EventClient eventClient;
-    private final RequestClient requestClient;
 
     @Override
     public void subscribe(Long userId, Long publisherId) {

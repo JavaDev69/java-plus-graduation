@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.exception.ConflictException;
 import ru.practicum.dto.user.NewUserRequest;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dao.model.User;
-import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.dao.repository.UserRepository;
+import ru.practicum.user.mapper.UserMapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,7 +73,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDto findById(Long id) {
-        log.info("Получен запрос на получение пользователя по id: {}",id);
+        log.info("Получен запрос на получение пользователя по id: {}", id);
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> {

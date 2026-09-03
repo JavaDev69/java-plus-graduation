@@ -19,7 +19,7 @@ import ru.practicum.client.UserClient;
         RequestClient.class
 })
 @EnableDiscoveryClient
-@SpringBootApplication(scanBasePackages = {"ru.practicum.subscription","ru.practicum.error"})
+@SpringBootApplication(scanBasePackages = {"ru.practicum.subscription", "ru.practicum.error"})
 public class SubscriptionServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(SubscriptionServiceApp.class, args);
