@@ -28,9 +28,6 @@ public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
     private final EventClient eventClient;
-//    private final RequestClient requestClient;
-//    private final RateClient rateClient;
-//    private final StatsClient statsClient;
 
     /**
      * Создает новую подборку событий.
@@ -139,7 +136,6 @@ public class CompilationServiceImpl implements CompilationService {
         return mapToDtoWithStats(compilation);
     }
 
-
     /**
      * Преобразует подборку в DTO с заполненной статистикой.
      *
@@ -186,75 +182,4 @@ public class CompilationServiceImpl implements CompilationService {
                 .map(comp -> CompilationMapper.toCompilationDto(comp, Collections.emptyList()))
                 .toList();
     }
-
-//    private Map<Long, Long> getRatingsMap(List<Event> events) {
-//        if (events.isEmpty()) return Collections.emptyMap();
-//        List<Long> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
-//        List<Object[]> results = rateRepository.getRatingsForEvents(eventIds);
-//        return results.stream().collect(Collectors.toMap(
-//                row -> ((Number) row[0]).longValue(),
-//                row -> ((Number) row[1]).longValue()
-//        ));
-//    }
-
-//    /**
-//     * Получает карту количества подтвержденных запросов для списка событий.
-//     *
-//     * @param events список событий
-//     * @return карта, где ключ - идентификатор события, значение - количество подтвержденных запросов
-//     */
-//    private Map<Long, Long> getConfirmedRequestsMap(List<Event> events) {
-//        if (events.isEmpty()) return Map.of();
-//
-//        List<Long> eventIds = events.stream()
-//                .map(Event::getId)
-//                .toList();
-//
-//        List<Object[]> results = requestRepository.countConfirmedRequestsByEventIds(eventIds, EventState.CONFIRMED);
-//
-//        return results.stream()
-//                .collect(Collectors.toMap(
-//                        row -> ((Number) row[0]).longValue(),
-//                        row -> ((Number) row[1]).longValue()
-//                ));
-//    }
-
-//    /**
-//     * Получает карту количества просмотров для списка событий из сервиса статистики.
-//     *
-//     * @param events список событий
-//     * @return карта, где ключ - идентификатор события, значение - количество просмотров
-//     */
-//    private Map<Long, Long> getViewsMap(List<Event> events) {
-//        if (events.isEmpty()) return Collections.emptyMap();
-//
-//        List<String> uris = events.stream()
-//                .map(e -> "/events/" + e.getId())
-//                .toList();
-//
-//        LocalDateTime start = LocalDateTime.now().minusYears(10);
-//        LocalDateTime end = LocalDateTime.now();
-//
-//        List<ViewStats> stats;
-//        try {
-//            ResponseEntity<List<ViewStats>> response = statsClient.getStats(start, end, uris, true);
-//            stats = response.getBody();
-//        } catch (Exception e) {
-//            log.error("Ошибка при получении статистики", e);
-//            return Collections.emptyMap();
-//        }
-//
-//        Map<Long, Long> viewsMap = new HashMap<>();
-//        for (ViewStats stat : stats) {
-//            String uri = stat.getUri();
-//            if (uri.startsWith("/events/")) {
-//                try {
-//                    Long eventId = Long.parseLong(uri.substring("/events/".length()));
-//                    viewsMap.put(eventId, stat.getHits());
-//                } catch (NumberFormatException ignored) {
-//                }
-//            }
-//        }
-//        return viewsMap;
-//    }
 }

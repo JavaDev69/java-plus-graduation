@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 @RestControllerAdvice(basePackages = "ru.practicum")
 public class GlobalExceptionHandler {
 
+    public static final String INCORRECTLY_MADE_REQUEST = "Incorrectly made request.";
+
     /**
      * Обработка ошибок валидации (400 Bad Request)
      */
@@ -42,12 +44,12 @@ public class GlobalExceptionHandler {
                 .map(fe -> String.format("Field: %s. Error: %s. Value: %s",
                         fe.getField(),
                         fe.getDefaultMessage(),
-                        (fe.getRejectedValue() != null) ? fe.getRejectedValue().toString() : "null"))
-                .collect(Collectors.toList());
+                        fe.getRejectedValue()))
+                .toList();
 
         return new ErrorResponse(
-                "BAD_REQUEST",
-                "Incorrectly made request.",
+                HttpStatus.BAD_REQUEST.name(),
+                INCORRECTLY_MADE_REQUEST,
                 String.join("; ", errorMessages),
                 LocalDateTime.now()
         );
@@ -64,11 +66,11 @@ public class GlobalExceptionHandler {
                         violation.getInvalidValue(),
                         violation.getMessage()
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
         return new ErrorResponse(
-                "BAD_REQUEST",
-                "Incorrectly made request.",
+                 HttpStatus.BAD_REQUEST.name(),
+                INCORRECTLY_MADE_REQUEST,
                 String.join("; ", errorMessages),
                 LocalDateTime.now()
         );
@@ -98,13 +100,13 @@ public class GlobalExceptionHandler {
             WebRequest request) {
 
         ErrorResponse errorResponse = new ErrorResponse(
-                "FORBIDDEN",
+                HttpStatus.FORBIDDEN.name(),
                 "For the requested operation the conditions are not met.",
                 ex.getMessage(),
                 LocalDateTime.now()
         );
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); // 409 Conflict
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     /**
@@ -116,12 +118,9 @@ public class GlobalExceptionHandler {
         String rootCauseMessage = Objects.requireNonNull(ex.getRootCause()).getMessage();
 
         return new ErrorResponse(
-                "CONFLICT",
+                HttpStatus.CONFLICT.name(),
                 "Integrity constraint has been violated.",
                 rootCauseMessage,
-                //"constraint [uq_email]",
-                //до конца не ясно какой сценарий,
-                // пока пусть будет фиксированное значение при любом конфликте в БД
                 LocalDateTime.now()
         );
     }
@@ -133,7 +132,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ErrorResponse handleConflictException(ConflictException ex) {
         return new ErrorResponse(
-                "CONFLICT",
+                HttpStatus.CONFLICT.name(),
                 "Conflict occurred.",
                 ex.getMessage(),
                 LocalDateTime.now()
@@ -144,7 +143,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ErrorResponse handleNotFoundException(NotFoundException ex) {
         return new ErrorResponse(
-                "NOT_FOUND",
+                HttpStatus.NOT_FOUND.name(),
                 "The required object was not found.",
                 ex.getMessage(),
                 LocalDateTime.now()
@@ -158,8 +157,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ErrorResponse handleAllUncaughtException(Exception ex) {
         return new ErrorResponse(
-                "INTERNAL_SERVER_ERROR",
-                "Internal server error.",
+                HttpStatus.INTERNAL_SERVER_ERROR.name(),
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                 ex.getMessage(),
                 LocalDateTime.now()
         );
@@ -169,11 +168,11 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String paramName = ex.getName();
-        String value = ex.getValue() != null ? ex.getValue().toString() : "null";
+        String value = String.valueOf(ex.getValue());
 
         return new ErrorResponse(
-                "BAD_REQUEST",
-                "Incorrectly made request.",
+                 HttpStatus.BAD_REQUEST.name(),
+                INCORRECTLY_MADE_REQUEST,
                 String.format("Parameter '%s' with value '%s' cannot be converted to required type", paramName, value),
                 LocalDateTime.now()
         );
@@ -222,7 +221,7 @@ public class GlobalExceptionHandler {
         }
 
         ErrorResponse error = new ErrorResponse(
-                "BAD_REQUEST",
+                 HttpStatus.BAD_REQUEST.name(),
                 "Validation failed",
                 errorMessage,
                 LocalDateTime.now()
@@ -234,8 +233,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
 
         ErrorResponse error = new ErrorResponse(
-                "BAD_REQUEST",
-                "Incorrectly made request.",
+                 HttpStatus.BAD_REQUEST.name(),
+                INCORRECTLY_MADE_REQUEST,
                 ex.getMessage(),
                 LocalDateTime.now()
         );
@@ -249,8 +248,8 @@ public class GlobalExceptionHandler {
         String paramName = ex.getParameterName();
 
         return new ErrorResponse(
-                "BAD_REQUEST",
-                "Incorrectly made request.",
+                 HttpStatus.BAD_REQUEST.name(),
+                INCORRECTLY_MADE_REQUEST,
                 String.format("Required request parameter '%s' is not present", paramName),
                 LocalDateTime.now()
         );
@@ -260,8 +259,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIllegalArgumentException(IllegalArgumentException ex) {
         return new ErrorResponse(
-                "BAD_REQUEST",
-                "Incorrectly made request.",
+                 HttpStatus.BAD_REQUEST.name(),
+                INCORRECTLY_MADE_REQUEST,
                 ex.getMessage(),
                 LocalDateTime.now()
         );
