@@ -84,4 +84,7 @@ public interface EventOperation {
             @Min(value = 1, message = "Size must be greater than 0")
             @Max(value = 1000, message = "Size must be less than or equal to 1000")
             Integer size);
+
+    @GetMapping("/categoty/{id}/check")
+    Boolean checkCategoryInUse(@PathVariable("id") Long categoryId);
 }

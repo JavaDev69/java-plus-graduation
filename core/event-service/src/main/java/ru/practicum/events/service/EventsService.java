@@ -81,4 +81,6 @@ public interface EventsService {
                                                                 PageRequest pageRequest);
 
     EventFullDto getEventById(Long id);
+
+    Boolean checkCategoryInUse(Long categoryId);
 }

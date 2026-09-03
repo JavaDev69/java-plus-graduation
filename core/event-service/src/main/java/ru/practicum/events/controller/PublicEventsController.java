@@ -97,4 +97,10 @@ public class PublicEventsController implements EventOperation {
         PageRequest pageRequest = PageRequest.of(from / size, size);
         return eventService.findActualPublishedEventsBySubscriberId(id, publisherIds, state, time, pageRequest);
     }
+
+    @Override
+    public Boolean checkCategoryInUse(Long categoryId) {
+        return eventService.checkCategoryInUse(categoryId);
+    }
+
 }

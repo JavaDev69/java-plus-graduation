@@ -662,4 +662,12 @@ public class EventsServiceImpl implements EventsService {
         CategoryDto category = event.getCategoryId() == null ? null : findCategoryById(event.getCategoryId());
         return toEventFullDto(event, category, user, rating);
     }
+
+    @Override
+    public Boolean checkCategoryInUse(Long categoryId) {
+        log.info("Получен запрос на проверку использования категории '{}' в событиях",categoryId);
+        return eventRepository.existsByCategoryId(categoryId);
+    }
+
+
 }

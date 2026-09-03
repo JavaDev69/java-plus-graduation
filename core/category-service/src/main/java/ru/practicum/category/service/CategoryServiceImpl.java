@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.dal.model.Category;
 import ru.practicum.category.dal.repository.CategoryRepository;
 import ru.practicum.category.mapper.CategoryMapper;
+import ru.practicum.client.EventClient;
 import ru.practicum.dto.categories.CategoryDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
@@ -22,6 +23,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final EventClient eventClient;
 
     @Transactional(readOnly = true)
     @Override
@@ -80,11 +82,10 @@ public class CategoryServiceImpl implements CategoryService {
             throw new NotFoundException("Category with id=" + catId + " was not found");
         }
 
-        int deletedCount = categoryRepository.deleteCategoryIfNotUsed(catId);
-
-        if (deletedCount == 0) {
+        if (eventClient.checkCategoryInUse(catId)) {
             throw new ConflictException("Category is used by events and cannot be deleted");
         }
+        categoryRepository.deleteById(catId);
     }
 
     @Override
