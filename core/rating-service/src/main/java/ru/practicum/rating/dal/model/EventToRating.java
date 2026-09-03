@@ -7,5 +7,6 @@ package ru.practicum.rating.dal.model;
  */
 public interface EventToRating {
     Long getEventId();
+
     Long getRating();
 }
