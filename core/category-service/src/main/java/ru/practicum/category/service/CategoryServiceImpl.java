@@ -95,7 +95,7 @@ public class CategoryServiceImpl implements CategoryService {
         HashSet<Long> ids = new HashSet<>(catIds);
         if (!ids.containsAll(findedIds)) {
             findedIds.forEach(ids::remove);
-            log.warn("Не удалось найти категории для следующих id:{}",ids);
+            log.warn("Не удалось найти категории для следующих id:{}", ids);
         }
         return allById.stream()
                 .map(CategoryMapper::toCategoryDto)

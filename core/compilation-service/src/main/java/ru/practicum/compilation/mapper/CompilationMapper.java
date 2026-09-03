@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import ru.practicum.compilation.dal.model.Compilation;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.NewCompilationDto;
-import ru.practicum.dto.events.EventFullDto;
 import ru.practicum.dto.events.EventShortDto;
 
 import java.util.List;

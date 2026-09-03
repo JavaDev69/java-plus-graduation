@@ -7,9 +7,9 @@ import ru.practicum.dto.events.EventState;
 import ru.practicum.dto.events.NewEventDto;
 import ru.practicum.dto.events.UpdateEventAdminRequest;
 import ru.practicum.dto.events.UpdateEventUserRequest;
+import ru.practicum.events.dal.model.EventsSortType;
 import ru.practicum.exception.ForbiddenActionException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.events.dal.model.EventsSortType;
 
 import java.time.LocalDateTime;
 import java.util.List;

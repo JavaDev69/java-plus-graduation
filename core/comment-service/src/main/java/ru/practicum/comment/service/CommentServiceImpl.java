@@ -52,7 +52,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = CommentMapper.toComment(dto, event, author);
         Comment saved = commentRepository.save(comment);
 
-        return CommentMapper.toCommentDto(saved,author);
+        return CommentMapper.toCommentDto(saved, author);
     }
 
     @Override
@@ -69,13 +69,13 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> getCommentsByEventId(Long eventId, Integer from, Integer size) {
         PageRequest page = PageRequest.of(from / size, size);
         List<Comment> byEventIdAndStatus = commentRepository.findByEventIdAndStatus(eventId, CommentStatus.APPROVED, page);
-        if(byEventIdAndStatus.isEmpty()) {
+        if (byEventIdAndStatus.isEmpty()) {
             return Collections.emptyList();
         }
         List<Long> authorIds = byEventIdAndStatus.stream().map(Comment::getAuthorId).distinct().toList();
         log.info("Список id авторов для получения UserDto: {}", authorIds);
         List<UserDto> userDtos = userClient.get(authorIds, 0, authorIds.size());
-        Map<Long, UserDto> users = userDtos.stream().collect(Collectors.toMap(UserShortDto::getId,Function.identity()));
+        Map<Long, UserDto> users = userDtos.stream().collect(Collectors.toMap(UserShortDto::getId, Function.identity()));
 
         return byEventIdAndStatus.stream()
                 .map(comment -> CommentMapper.toCommentDto(
@@ -103,7 +103,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setUpdatedOn(LocalDateTime.now());
 
         UserDto user = userClient.getById(comment.getAuthorId());
-        return CommentMapper.toCommentDto(commentRepository.save(comment),user);
+        return CommentMapper.toCommentDto(commentRepository.save(comment), user);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class CommentServiceImpl implements CommentService {
                 saved.getId(), userId, saved.getStatus(), saved.getText());
 
         UserDto user = userClient.getById(comment.getAuthorId());
-        return CommentMapper.toCommentDto(saved,user);
+        return CommentMapper.toCommentDto(saved, user);
     }
 
     @Transactional

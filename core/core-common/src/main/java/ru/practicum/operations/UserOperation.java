@@ -71,6 +71,7 @@ public interface UserOperation {
 
     /**
      * Получает пользователя по {@code id}
+     *
      * @param id id пользователя
      * @return пользователь с {@code id}
      */

@@ -3,7 +3,6 @@ package ru.practicum.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import ru.practicum.client.config.FeignClientConfig;
 import ru.practicum.operations.EventOperation;
-import ru.practicum.operations.UserOperation;
 
 /**
  * @author Andrew Vilkov

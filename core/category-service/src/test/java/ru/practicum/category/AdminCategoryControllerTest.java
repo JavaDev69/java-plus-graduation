@@ -11,16 +11,21 @@ import ru.practicum.category.controller.AdminCategoryController;
 import ru.practicum.category.service.CategoryService;
 import ru.practicum.dto.categories.CategoryDto;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = AdminCategoryController.class,
-properties = {
-        "spring.cloud.config.enabled=false",
-        "spring.config.location=classpath:application-test.properties"
-})
+        properties = {
+                "spring.cloud.config.enabled=false",
+                "spring.config.location=classpath:application-test.properties"
+        })
 class AdminCategoryControllerTest {
 
     @Autowired

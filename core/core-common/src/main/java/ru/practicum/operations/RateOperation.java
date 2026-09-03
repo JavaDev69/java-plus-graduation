@@ -3,7 +3,6 @@ package ru.practicum.operations;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -20,5 +19,5 @@ public interface RateOperation {
     Long getRatingByEventId(@PathVariable(name = "eventId") Long id);
 
     @GetMapping
-    Map<Long,Long> getRatingByEventIds(@RequestParam @NotEmpty List<Long> eventIds);
+    Map<Long, Long> getRatingByEventIds(@RequestParam @NotEmpty List<Long> eventIds);
 }

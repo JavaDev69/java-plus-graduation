@@ -119,7 +119,7 @@ public class EventsServiceImpl implements EventsService {
 
         Map<Long, CategoryDto> idToCategory = new HashMap<>();
         if (categoryIds != null && !categoryIds.isEmpty()) {
-            log.info("Отправляем запрос на получение категорий для ids: {}",categoryIds);
+            log.info("Отправляем запрос на получение категорий для ids: {}", categoryIds);
             List<CategoryDto> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds).getBody();
             if (categoriesByIds != null) {
                 idToCategory.putAll(
