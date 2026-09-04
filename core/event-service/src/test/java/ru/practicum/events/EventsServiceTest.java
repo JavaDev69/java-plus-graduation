@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.ResponseEntity;
 import ru.practicum.StatsClient;
 import ru.practicum.client.CategoryClient;
 import ru.practicum.client.RateClient;
@@ -62,7 +61,7 @@ class EventsServiceTest {
                 .name("Test Category")
                 .build();
         when(categoryClient.getCategoryById(1L))
-                .thenReturn(ResponseEntity.ok(category));
+                .thenReturn(category);
         when(userClient.getById(1L))
                 .thenReturn(user);
 

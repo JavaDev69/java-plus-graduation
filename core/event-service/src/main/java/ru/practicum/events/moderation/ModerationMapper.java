@@ -1,9 +1,11 @@
 package ru.practicum.events.moderation;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.dto.events.ModerationCommentShortDto;
 
 import static ru.practicum.common.Constance.FORMATTER;
 
+@UtilityClass
 public class ModerationMapper {
     public static ModerationCommentShortDto moderationCommentShortDto(ModerationComment mc) {
         ModerationCommentShortDto dto = new ModerationCommentShortDto();

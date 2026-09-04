@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +29,7 @@ public class AdminEventsController {
     private final EventsService adminEventService;
 
     @GetMapping
-    public ResponseEntity<List<EventFullDto>> getEvents(
+    public List<EventFullDto> getEvents(
             @RequestParam(required = false) List<Long> users,
             @RequestParam(required = false) List<String> states,
             @RequestParam(required = false) List<Long> categories,
@@ -42,18 +41,18 @@ public class AdminEventsController {
         log.info("Получен запрос на получение списка обо всех событиях подходящих под переданные условия");
         List<EventFullDto> events = adminEventService.getEvents(users, states, categories, rangeStart, rangeEnd, from, size);
         log.info("Получен список событий подходящих под условия. Количество элементов: {}", events.size());
-        return ResponseEntity.ok(events);
+        return events;
     }
 
     @PatchMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> updateEventByAdmin(
+    public EventFullDto updateEventByAdmin(
             @PathVariable Long eventId,
             @Valid @RequestBody UpdateEventAdminRequest updateRequest
     ) {
         log.info("Получен запрос на редактирование события с ID: {}", eventId);
         EventFullDto updatedEvent = adminEventService.updateEventByAdmin(eventId, updateRequest);
-        log.info("Собьытие успешно отредактировано.");
-        return ResponseEntity.ok(updatedEvent);
+        log.info("Собьытие успешно отредактировано. {}", updatedEvent);
+        return updatedEvent;
     }
 
     @GetMapping("/moderation")

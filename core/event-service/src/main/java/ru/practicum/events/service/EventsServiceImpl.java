@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.StatsClient;
 import ru.practicum.client.CategoryClient;
@@ -44,7 +43,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -76,7 +74,7 @@ public class EventsServiceImpl implements EventsService {
     public EventFullDto saveEvent(NewEventDto newEventDto, Long userId) {
         validateEventDate(newEventDto.getEventDate());
         UserDto user = userClient.getById(userId);
-        CategoryDto category = findCategoryById(newEventDto.getCategory());
+        CategoryDto category = categoryClient.getCategoryById(newEventDto.getCategory());
 
         Event event = toEvent(newEventDto, user, category.getId());
         Event savedEvent = eventRepository.save(event);
@@ -117,16 +115,8 @@ public class EventsServiceImpl implements EventsService {
         Map<Long, Long> requestCounts = getRequestCounts(events.stream().map(Event::getId).toList());
         Map<Long, Long> ratingsMap = getRatingsMap(events);
 
-        Map<Long, CategoryDto> idToCategory = new HashMap<>();
-        if (categoryIds != null && !categoryIds.isEmpty()) {
-            log.info("Отправляем запрос на получение категорий для ids: {}", categoryIds);
-            List<CategoryDto> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds).getBody();
-            if (categoriesByIds != null) {
-                idToCategory.putAll(
-                        categoriesByIds.stream()
-                                .collect(Collectors.toMap(CategoryDto::getId, Function.identity())));
-            }
-        }
+        Map<Long, CategoryDto> idToCategory = getIdToCategoryForEvent(events);
+
         List<EventShortDto> dtoList = events.stream()
                 .map(event ->
                         toShortEventDto(
@@ -163,7 +153,7 @@ public class EventsServiceImpl implements EventsService {
         setViewsToEvents(List.of(event));
         Long rating = rateClient.getRatingByEventId(id);
         UserDto user = userClient.getById(event.getInitiatorId());
-        CategoryDto category = event.getCategoryId() == null ? null : findCategoryById(event.getCategoryId());
+        CategoryDto category = event.getCategoryId() == null ? null : categoryClient.getCategoryById(event.getCategoryId());
         return toEventFullDto(event, category, user, rating);
     }
 
@@ -174,10 +164,7 @@ public class EventsServiceImpl implements EventsService {
 
         Map<Long, Long> eventToRequest = requestClient.countRequestsByEventIdsAndStatus(ids, EventState.CONFIRMED);
         Map<Long, Long> ratingByEventIds = rateClient.getRatingByEventIds(ids);
-        List<Long> categoryIds = allById.stream().map(Event::getCategoryId).distinct().toList();
-        ResponseEntity<List<CategoryDto>> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds);
-        Map<Long, CategoryDto> idToCategory = categoriesByIds.getBody() == null ?
-                emptyMap() : categoriesByIds.getBody().stream().collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
+        Map<Long, CategoryDto> idToCategory = getIdToCategoryForEvent(allById);
 
         List<Long> userIds = allById.stream().map(Event::getInitiatorId).distinct().toList();
         List<UserDto> userDtos = userClient.get(userIds, 0, userIds.size());
@@ -245,12 +232,7 @@ public class EventsServiceImpl implements EventsService {
         Map<Long, Long> ratings = getRatingsMap(events);
         setViewsToEvents(events);
 
-        List<Long> categoryIdsFromEvent = events.stream().map(Event::getCategoryId).distinct().toList();
-        log.info("Список ID категорий событий: {}", categoryIdsFromEvent);
-        ResponseEntity<List<CategoryDto>> categoriesByIds = categoryClient.getCategoriesByIds(categoryIdsFromEvent);
-        log.info("Получены категории: {}", categoriesByIds.getBody());
-        Map<Long, CategoryDto> idToCategory = categoriesByIds.getBody() == null ?
-                emptyMap() : categoriesByIds.getBody().stream().collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
+        Map<Long, CategoryDto> idToCategory = getIdToCategoryForEvent(events);
 
         List<Long> userFromEventsIds = events.stream().map(Event::getInitiatorId).distinct().toList();
         List<UserDto> userDtos = userClient.get(userFromEventsIds, 0, userFromEventsIds.size());
@@ -317,7 +299,7 @@ public class EventsServiceImpl implements EventsService {
         setViewsToEvent(saved);
 
         Long rating = rateClient.getRatingByEventId(saved.getId());
-        CategoryDto category = findCategoryById(saved.getCategoryId());
+        CategoryDto category = categoryClient.getCategoryById(saved.getCategoryId());
         UserDto user = userClient.getById(saved.getInitiatorId());
 
         return EventsMapper.toEventFullDto(
@@ -388,7 +370,7 @@ public class EventsServiceImpl implements EventsService {
 
         Long rating = rateClient.getRatingByEventId(updatedEvent.getId());
         UserDto user = userClient.getById(updatedEvent.getInitiatorId());
-        CategoryDto category = findCategoryById(updatedEvent.getCategoryId());
+        CategoryDto category = categoryClient.getCategoryById(updatedEvent.getCategoryId());
 
         return toEventFullDto(
                 updatedEvent,
@@ -412,11 +394,7 @@ public class EventsServiceImpl implements EventsService {
 
         Map<Long, Long> confirmedRequests = getConfirmedRequestsMap(events);
         Map<Long, Long> ratings = getRatingsMap(events);
-
-        List<Long> categoryIds = events.stream().map(Event::getCategoryId).distinct().toList();
-        ResponseEntity<List<CategoryDto>> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds);
-        Map<Long, CategoryDto> idToCategory = categoriesByIds.getBody() == null ?
-                emptyMap() : categoriesByIds.getBody().stream().collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
+        Map<Long, CategoryDto> idToCategory = getIdToCategoryForEvent(events);
 
         List<EventFullDto> eventFullDtos = events.stream()
                 .peek(event -> event.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0L)))
@@ -460,7 +438,7 @@ public class EventsServiceImpl implements EventsService {
         // Обновляем просмотры
         setViewsToEvent(event);
         Long rating = rateClient.getRatingByEventId(eventId);
-        CategoryDto category = findCategoryById(event.getCategoryId());
+        CategoryDto category = categoryClient.getCategoryById(event.getCategoryId());
         log.info("Полные данные события подготовлены для возврата");
         return toEventFullDto(event, category, user, rating);
     }
@@ -472,10 +450,6 @@ public class EventsServiceImpl implements EventsService {
         if (eventDate.isBefore(minEventDate)) {
             throw new EventCreationRuleException("eventDate", eventDate, "Событие не удовлетворяет правилам создания");
         }
-    }
-
-    private CategoryDto findCategoryById(Long categoryId) {
-        return categoryClient.getCategoryById(categoryId).getBody();
     }
 
     private void setViewsToEvent(Event event) {
@@ -491,8 +465,7 @@ public class EventsServiceImpl implements EventsService {
                             LocalDateTime.now(),
                             uris,
                             true
-                    )
-                    .getBody();
+                    );
         } catch (Exception e) {
             return Collections.emptyList();
         }
@@ -538,7 +511,7 @@ public class EventsServiceImpl implements EventsService {
             event.setLocationLon(request.getLocation().getLon());
         }
         if (request.getCategory() != null) {
-            CategoryDto category = categoryClient.getCategoryById(request.getCategory()).getBody();
+            CategoryDto category = categoryClient.getCategoryById(request.getCategory());
 
             if (category == null) {
                 throw new NotFoundException("Category with id=" + request.getCategory() + " was not found");
@@ -570,10 +543,7 @@ public class EventsServiceImpl implements EventsService {
                             Function.identity()
                     ));
 
-            List<Long> categoryIds = eventList.stream().map(Event::getCategoryId).distinct().toList();
-            ResponseEntity<List<CategoryDto>> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds);
-            Map<Long, CategoryDto> idToCategory = categoriesByIds.getBody() == null ?
-                    emptyMap() : categoriesByIds.getBody().stream().collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
+            Map<Long, CategoryDto> idToCategory = getIdToCategoryForEvent(eventList);
 
             List<Long> userIds = eventList.stream().map(Event::getInitiatorId).distinct().toList();
             List<UserDto> userDtos = userClient.get(userIds, 0, userIds.size());
@@ -601,11 +571,7 @@ public class EventsServiceImpl implements EventsService {
                 Boolean.TRUE, EventState.PENDING, pageable
         );
 
-        List<Long> categoryIds = events.stream().map(Event::getCategoryId).distinct().toList();
-        ResponseEntity<List<CategoryDto>> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds);
-        Map<Long, CategoryDto> idToCategory = categoriesByIds.getBody() == null ?
-                emptyMap() : categoriesByIds.getBody().stream().collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
-
+        Map<Long, CategoryDto> idToCategory = getIdToCategoryForEvent(events);
         List<Long> userIds = events.stream().map(Event::getInitiatorId).distinct().toList();
         List<UserDto> userDtos = userClient.get(userIds, 0, userIds.size());
         Map<Long, UserDto> users = userDtos.stream().collect(Collectors.toMap(UserDto::getId, Function.identity()));
@@ -628,10 +594,7 @@ public class EventsServiceImpl implements EventsService {
         List<Event> events = eventRepository.findActualPublishedEventsBySubscriberId(publisherIds, state, time, pageRequest);
         Map<Long, Long> requestCounts = getRequestCounts(events.stream().map(Event::getId).toList());
         Map<Long, Long> ratingsMap = getRatingsMap(events);
-        List<Long> categoryIds = events.stream().map(Event::getCategoryId).toList();
-        ResponseEntity<List<CategoryDto>> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds);
-        Map<Long, CategoryDto> idToCategory = categoriesByIds.getBody() == null ?
-                emptyMap() : categoriesByIds.getBody().stream().collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
+        Map<Long, CategoryDto> idToCategory = getIdToCategoryForEvent(events);
 
         List<Long> userIds = events.stream().map(Event::getInitiatorId).distinct().toList();
         List<UserDto> userDtos = userClient.get(userIds, 0, userIds.size());
@@ -659,15 +622,30 @@ public class EventsServiceImpl implements EventsService {
         setViewsToEvents(List.of(event));
         Long rating = rateClient.getRatingByEventId(id);
         UserDto user = userClient.getById(event.getInitiatorId());
-        CategoryDto category = event.getCategoryId() == null ? null : findCategoryById(event.getCategoryId());
+        CategoryDto category = event.getCategoryId() == null ? null : categoryClient.getCategoryById(event.getCategoryId());
         return toEventFullDto(event, category, user, rating);
     }
 
     @Override
     public Boolean checkCategoryInUse(Long categoryId) {
-        log.info("Получен запрос на проверку использования категории '{}' в событиях",categoryId);
+        log.info("Получен запрос на проверку использования категории '{}' в событиях", categoryId);
         return eventRepository.existsByCategoryId(categoryId);
     }
 
+    Map<Long, CategoryDto> getIdToCategoryForEvent(List<Event> events){
+        if(events == null || events.isEmpty()){
+            return  emptyMap();
+        }
 
+        List<Long> categoryIds = events.stream().map(Event::getCategoryId).toList();
+
+        if(categoryIds.isEmpty()){
+            return  emptyMap();
+        }
+
+        log.info("Отправляем запрос на получение категорий для ids: {}", categoryIds);
+        List<CategoryDto> categoriesByIds = categoryClient.getCategoriesByIds(categoryIds);
+        return categoriesByIds == null ?
+                emptyMap() : categoriesByIds.stream().collect(Collectors.toMap(CategoryDto::getId, Function.identity()));
+    }
 }

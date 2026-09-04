@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,19 +24,18 @@ public class AdminCategoryController {
 
     private final CategoryService categoryService;
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CategoryDto dto) {
-        CategoryDto created = categoryService.createCategory(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public CategoryDto createCategory(@Valid @RequestBody CategoryDto dto) {
+        return categoryService.createCategory(dto);
     }
 
     @PatchMapping("/{catId}")
-    public ResponseEntity<CategoryDto> updateCategory(
+    public CategoryDto updateCategory(
             @PathVariable Long catId,
             @Valid @RequestBody CategoryDto dto
     ) {
-        CategoryDto updated = categoryService.updateCategory(catId, dto);
-        return ResponseEntity.ok(updated);
+        return categoryService.updateCategory(catId, dto);
     }
 
     @DeleteMapping("/{catId}")

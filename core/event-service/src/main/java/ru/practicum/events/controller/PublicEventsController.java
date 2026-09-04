@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -32,7 +31,7 @@ public class PublicEventsController implements EventOperation {
     private final StatsClient statsClient;
 
     @Override
-    public ResponseEntity<List<EventShortDto>> getEvents(
+    public List<EventShortDto> getEvents(
             String text,
             List<Long> categories,
             Boolean paid,
@@ -44,34 +43,29 @@ public class PublicEventsController implements EventOperation {
             Integer size
     ) {
         saveHitInfo();
-        List<EventShortDto> events = eventService.getPublishedEvents(
+        return eventService.getPublishedEvents(
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
                 EventsSortType.valueOf(sort), from, size
         );
-
-        return ResponseEntity.ok(events);
     }
 
     @Override
-    public ResponseEntity<EventFullDto> getPublishedEventById(Long id) {
+    public EventFullDto getPublishedEventById(Long id) {
         saveHitInfo();
 
-        EventFullDto event = eventService.getPublishedEventById(id);
-        return ResponseEntity.ok(event);
+        return eventService.getPublishedEventById(id);
     }
 
     @Override
-    public ResponseEntity<EventFullDto> getEventById(Long id) {
+    public EventFullDto getEventById(Long id) {
         saveHitInfo();
 
-        EventFullDto event = eventService.getEventById(id);
-        return ResponseEntity.ok(event);
+        return eventService.getEventById(id);
     }
 
     @Override
-    public ResponseEntity<List<EventShortDto>> getEventByIds(List<Long> ids) {
-        List<EventShortDto> shortEventByIds = eventService.getShortEventByIds(ids);
-        return ResponseEntity.ok(shortEventByIds);
+    public List<EventShortDto> getEventByIds(List<Long> ids) {
+        return eventService.getShortEventByIds(ids);
     }
 
     private void saveHitInfo() {

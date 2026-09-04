@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import ru.practicum.StatsClient;
 import ru.practicum.client.CategoryClient;
 import ru.practicum.client.RateClient;
@@ -62,7 +61,7 @@ class EventServiceImplTest {
     @BeforeEach
     void init() {
         when(categoryClient.getCategoriesByIds(any()))
-                .thenReturn(ResponseEntity.ok(Collections.emptyList()));
+                .thenReturn(Collections.emptyList());
     }
 
 
@@ -78,8 +77,9 @@ class EventServiceImplTest {
         List<EventFullDto> result = eventService.getUserModerationHistory(USER_ID, FROM, SIZE);
 
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result.isEmpty());
+        assertThat(result)
+                .isNotNull()
+                .isEmpty();
     }
 
     @Test
@@ -101,8 +101,9 @@ class EventServiceImplTest {
         List<EventFullDto> result = eventService.getUserModerationHistory(USER_ID, FROM, SIZE);
 
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(1); // Теперь ожидаем 1 событие
+        assertThat(result)
+                .isNotNull()
+                .hasSize(1); // Теперь ожидаем 1 событие
 
         EventFullDto eventDto = result.getFirst();
         assertThat(eventDto.getLastModerationCommentDto()).isNull();
@@ -135,8 +136,9 @@ class EventServiceImplTest {
         List<EventFullDto> result = eventService.getUserModerationHistory(USER_ID, 1, 5);
 
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(5); // Ожидаем 5 элементов на странице
+        assertThat(result)
+                .isNotNull()
+                .hasSize(5); // Ожидаем 5 элементов на странице
     }
 
 
@@ -151,8 +153,9 @@ class EventServiceImplTest {
         List<EventFullDto> result = eventService.getUserModerationHistory(USER_ID, FROM, SIZE);
 
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result).isEmpty(); // Явная проверка на пустой список
+        assertThat(result)
+                .isNotNull()
+                .isEmpty(); // Явная проверка на пустой список
     }
 
 
@@ -166,11 +169,9 @@ class EventServiceImplTest {
         Event event2 = createEvent(2L, USER_ID + 1, EventState.REJECTED); // Другой пользователь
         Event event3 = createEvent(3L, USER_ID, EventState.PUBLISHED); // Другое состояние
 
-        List<Event> testEvents = Arrays.asList(event1, event2, event3);
-
         // Мок возвращает только события, соответствующие фильтру (event1)
         when(eventRepository.findUserModerationHistory(USER_ID, pageable))
-                .thenReturn(Arrays.asList(event1));
+                .thenReturn(Collections.singletonList(event1));
 
         when(moderationCommentRepository.findLastCommentsByEventIds(anyList()))
                 .thenReturn(Collections.emptyList());
@@ -179,8 +180,9 @@ class EventServiceImplTest {
         List<EventFullDto> result = eventService.getUserModerationHistory(USER_ID, FROM, SIZE);
 
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(1);
+        assertThat(result).
+                isNotNull()
+                .hasSize(1);
         assertThat(result.getFirst().getId()).isEqualTo(1L);
     }
 

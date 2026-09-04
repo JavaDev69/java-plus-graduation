@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,7 +24,7 @@ import java.util.List;
 public interface EventOperation {
 
     @GetMapping
-    ResponseEntity<List<EventShortDto>> getEvents(
+    List<EventShortDto> getEvents(
             @RequestParam(required = false)
             @Size(max = 1000, message = "Text length must be less than or equal to 1000 characters")
             String text,
@@ -60,13 +59,13 @@ public interface EventOperation {
     );
 
     @GetMapping("/{id}")
-    ResponseEntity<EventFullDto> getPublishedEventById(@PathVariable @Positive Long id);
+    EventFullDto getPublishedEventById(@PathVariable @Positive Long id);
 
     @GetMapping("/full/{id}")
-    ResponseEntity<EventFullDto> getEventById(@PathVariable @Positive Long id);
+    EventFullDto getEventById(@PathVariable @Positive Long id);
 
     @GetMapping("/short/byIds")
-    ResponseEntity<List<EventShortDto>> getEventByIds(@RequestParam List<Long> ids);
+    List<EventShortDto> getEventByIds(@RequestParam List<Long> ids);
 
     @GetMapping("/subscriber/{id}")
     List<EventShortDto> getActualPublishedEventsBySubscriberId(

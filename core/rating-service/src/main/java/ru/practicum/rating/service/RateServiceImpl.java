@@ -2,7 +2,6 @@ package ru.practicum.rating.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.EventClient;
@@ -35,13 +34,7 @@ public class RateServiceImpl implements RateService {
         log.info("Пользователь ID={} ставит {} событию ID={}", userId, isLike ? "ЛАЙК" : "ДИЗЛАЙК", eventId);
 
         UserDto user = userClient.getById(userId);
-
-        ResponseEntity<EventFullDto> eventById = eventClient.getEventById(eventId);
-        if (eventById.getBody() == null) {
-            throw new NotFoundException("Событие с ID " + eventId + " не найдено");
-        }
-
-        EventFullDto event = eventById.getBody();
+        EventFullDto event = eventClient.getEventById(eventId);
 
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Нельзя оценивать неопубликованные события");
@@ -69,13 +62,9 @@ public class RateServiceImpl implements RateService {
 
         // Проверяем, существует ли пользователь и событие
         UserDto user = userClient.getById(userId);
+        EventFullDto eventById = eventClient.getEventById(eventId);
 
-        ResponseEntity<EventFullDto> eventById = eventClient.getEventById(eventId);
-        if (eventById.getBody() == null) {
-            throw new NotFoundException("Событие с ID " + eventId + " не найдено");
-        }
-
-        Rate rate = rateRepository.findByEventIdAndUserId(eventId, user.getId())
+        Rate rate = rateRepository.findByEventIdAndUserId(eventById.getId(), user.getId())
                 .orElseThrow(() -> new NotFoundException("Оценка пользователя ID=" + userId + " для события ID=" + eventId + " не найдена"));
 
         rateRepository.delete(rate);

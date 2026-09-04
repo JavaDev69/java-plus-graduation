@@ -9,7 +9,6 @@ import ru.practicum.dto.events.EventState;
 import ru.practicum.operations.RequestOperation;
 import ru.practicum.request.service.RequestsService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

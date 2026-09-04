@@ -2,7 +2,6 @@ package ru.practicum.request.participation;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.EventClient;
@@ -42,12 +41,7 @@ public class ParticipationsRequestsService {
         UserDto requester = userClient.getById(userId);
 
         // 2. Проверяем существование события
-        ResponseEntity<EventFullDto> eventById = eventClient.getEventById(eventId);
-        if (eventById.getBody() == null) {
-            throw new NotFoundException("Событие с ID " + eventId + " не найдено");
-        }
-
-        EventFullDto event = eventById.getBody();
+        EventFullDto event = eventClient.getEventById(eventId);
         log.info("Получили событие: {}", event);
 
         // 3. Проверяем, что пользователь не является инициатором события

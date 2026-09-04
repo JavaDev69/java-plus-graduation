@@ -22,7 +22,6 @@ import ru.practicum.request.mapper.RequestsMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,9 +39,7 @@ public class RequestsServiceImpl implements RequestsService {
             Long userId, Long eventId, EventRequestStatusUpdateRequest request) {
 
         // 1. Проверяем существование события и принадлежность пользователю
-        Optional<EventFullDto> eventFullDto = Optional.ofNullable(eventClient.getEventById(eventId).getBody());
-        EventFullDto event = eventFullDto
-                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+        EventFullDto event = eventClient.getEventById(eventId);
 
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ForbiddenActionException("User is not the initiator of the event");
@@ -108,9 +105,7 @@ public class RequestsServiceImpl implements RequestsService {
     @Override
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         // 1. Проверяем существование события и принадлежность пользователю
-        Optional<EventFullDto> eventFullDto = Optional.ofNullable(eventClient.getEventById(eventId).getBody());
-        EventFullDto event = eventFullDto
-                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+        EventFullDto event =eventClient.getEventById(eventId);
 
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ForbiddenActionException("User is not the initiator of the event");

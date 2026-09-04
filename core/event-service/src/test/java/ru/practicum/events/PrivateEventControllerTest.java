@@ -10,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -122,10 +121,10 @@ class PrivateEventControllerTest {
                 .thenReturn(0L);
 
         when(categoryClient.getCategoryById(any()))
-                .thenReturn(ResponseEntity.ok(category));
+                .thenReturn(category);
 
         when(categoryClient.getCategoriesByIds(any()))
-                .thenReturn(ResponseEntity.ok(List.of(category)));
+                .thenReturn(List.of(category));
     }
 
     /**

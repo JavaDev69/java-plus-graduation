@@ -1,6 +1,6 @@
 package ru.practicum.request.mapper;
 
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 import ru.practicum.common.Constance;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.request.dal.model.ParticipationRequest;
@@ -8,7 +8,7 @@ import ru.practicum.request.dal.model.ParticipationRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
+@UtilityClass
 public class RequestsMapper {
 
     public static ParticipationRequestDto toDto(ParticipationRequest request) {

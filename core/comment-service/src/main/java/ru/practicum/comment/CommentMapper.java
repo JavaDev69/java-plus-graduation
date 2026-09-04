@@ -1,8 +1,6 @@
 package ru.practicum.comment;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 import ru.practicum.dto.comments.CommentDto;
 import ru.practicum.dto.comments.CommentStatus;
 import ru.practicum.dto.comments.NewCommentDto;
@@ -13,8 +11,7 @@ import ru.practicum.dto.user.UserShortDto;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@Component
+@UtilityClass
 public class CommentMapper {
 
     public static CommentDto toCommentDto(Comment comment, UserShortDto user) {

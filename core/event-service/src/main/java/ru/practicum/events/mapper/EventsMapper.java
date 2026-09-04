@@ -1,5 +1,6 @@
 package ru.practicum.events.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.common.Constance;
 import ru.practicum.dto.categories.CategoryDto;
 import ru.practicum.dto.events.EventFullDto;
@@ -17,6 +18,7 @@ import java.time.ZoneId;
 
 import static ru.practicum.events.moderation.ModerationMapper.moderationCommentShortDto;
 
+@UtilityClass
 public class EventsMapper {
 
     public static EventShortDto toShortEventDto(Event event, CategoryDto category, UserShortDto userShortDto, Long confirmedRequests) {

@@ -3,7 +3,6 @@ package ru.practicum.comment.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.EventClient;
@@ -42,12 +41,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto addComment(Long userId, Long eventId, NewCommentDto dto) {
         UserDto author = userClient.getById(userId);
-        ResponseEntity<EventFullDto> eventById = eventClient.getPublishedEventById(eventId);
-        if (eventById.getBody() == null) {
-            throw new NotFoundException("Событие с ID " + eventId + " не найдено");
-        }
-
-        EventFullDto event = eventById.getBody();
+        EventFullDto event = eventClient.getPublishedEventById(eventId);
 
         Comment comment = CommentMapper.toComment(dto, event, author);
         Comment saved = commentRepository.save(comment);
@@ -59,7 +53,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentDto getCommentById(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Comment not found"));
+                .orElseThrow(() -> new NotFoundException("Comment with id '" + commentId + "' not found"));
         UserDto author = userClient.getById(comment.getAuthorId());
         return CommentMapper.toCommentDto(comment, author);
     }
@@ -129,7 +123,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteCommentByAuthor(Long userId, Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Comment not found"));
+                .orElseThrow(() -> new NotFoundException("Comment with id '" + commentId + "' not found"));
 
         if (!comment.getAuthorId().equals(userId)) {
             throw new IllegalArgumentException("You can only delete your own comments");
@@ -145,7 +139,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteCommentByModerator(Long userId, Long commentId) {
         commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Comment not found"));
+                .orElseThrow(() -> new NotFoundException("Comment with id '" + commentId + "' not found"));
         commentRepository.deleteById(commentId);
     }
 }

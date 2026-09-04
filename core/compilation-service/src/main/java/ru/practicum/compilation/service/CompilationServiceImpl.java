@@ -3,7 +3,6 @@ package ru.practicum.compilation.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.EventClient;
@@ -16,7 +15,6 @@ import ru.practicum.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.dto.events.EventShortDto;
 import ru.practicum.exception.NotFoundException;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,10 +38,10 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto createCompilation(NewCompilationDto dto) {
         log.info("Создание новой подборки: {}", dto.getTitle());
 
-        List<EventShortDto> events = new ArrayList<>();
+        List<EventShortDto> events = Collections.emptyList();
         if (dto.getEvents() != null && !dto.getEvents().isEmpty()) {
-            ResponseEntity<List<EventShortDto>> eventByIds = eventClient.getEventByIds(dto.getEvents());
-            events = eventByIds.getBody() == null ? Collections.emptyList() : eventByIds.getBody();
+            List<EventShortDto> eventByIds = eventClient.getEventByIds(dto.getEvents());
+            events = eventByIds == null ? Collections.emptyList() : eventByIds;
         }
 
         Compilation compilation = CompilationMapper.toCompilation(dto, events);
@@ -160,8 +158,7 @@ public class CompilationServiceImpl implements CompilationService {
                 .toList();
 
         if (!eventIds.isEmpty()) {
-            ResponseEntity<List<EventShortDto>> eventByIds = eventClient.getEventByIds(eventIds);
-            List<EventShortDto> eventShortDtos = eventByIds.getBody();
+            List<EventShortDto> eventShortDtos = eventClient.getEventByIds(eventIds);
             if (eventShortDtos == null || eventShortDtos.isEmpty()) {
                 throw new IllegalStateException("Ошибка получения событий");
             }
