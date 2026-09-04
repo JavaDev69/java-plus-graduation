@@ -1,0 +1,53 @@
+package ru.practicum.compilation.controller;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.compilation.service.CompilationService;
+import ru.practicum.dto.compilation.CompilationDto;
+import ru.practicum.dto.compilation.NewCompilationDto;
+import ru.practicum.dto.compilation.UpdateCompilationRequest;
+
+
+@RestController
+@RequestMapping("/admin/compilations")
+@RequiredArgsConstructor
+@Slf4j
+@Validated
+public class AdminCompilationController {
+
+    private final CompilationService compilationService;
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public CompilationDto createCompilation(@Valid @RequestBody NewCompilationDto dto) {
+        log.info("API Администратора: Запрос на создание подборки '{}'", dto.getTitle());
+        return compilationService.createCompilation(dto);
+    }
+
+    @PatchMapping("/{compId}")
+    public CompilationDto updateCompilation(
+            @Positive @PathVariable Long compId,
+            @Valid @RequestBody UpdateCompilationRequest request) {
+        log.info("API Администратора: Запрос на обновление подборки с ID={}", compId);
+        return compilationService.updateCompilation(compId, request);
+    }
+
+    @DeleteMapping("/{compId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCompilation(@Positive @PathVariable Long compId) {
+        log.info("API Администратора: Запрос на удаление подборки с ID={}", compId);
+        compilationService.deleteCompilation(compId);
+    }
+}

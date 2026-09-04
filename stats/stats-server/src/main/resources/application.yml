@@ -10,7 +10,7 @@ spring:
         service-id: config-server
       fail-fast: true
       retry:
-        use-randome-policy: true
+        use-random-policy: true
         max-interval: 20000
         initial-interval: 2000
 
