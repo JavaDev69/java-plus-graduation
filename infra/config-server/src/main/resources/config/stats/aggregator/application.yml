@@ -1,0 +1,38 @@
+server:
+  port: ${APP_PORT:9391}
+
+spring:
+  application:
+    name: aggregator
+
+grpc:
+  server:
+    port: 0
+    reflection-service-enabled: true
+
+analyzer:
+  kafka:
+    bootstrap-servers: "localhost:9092"
+    consumer:
+      properties:
+        "bootstrap.servers": ${analyzer.kafka.bootstrap-servers}
+        "client.id": "stats.aggregator.action"
+        "key.deserializer": org.apache.kafka.common.serialization.StringDeserializer
+        "value.deserializer": ru.practicum.serialization.avro.ActionSerializer
+        "enable-auto-commit": false
+      topic: stats.user-actions.v1
+      poll-timeout-ms: 100
+    producer:
+      properties:
+        "bootstrap.servers": ${analyzer.kafka.bootstrap-servers}
+        "client.id": "stats.aggregator.similarity"
+        "key.serializer": org.apache.kafka.common.serialization.VoidSerializer
+        "value.serializer": ru.practicum.serialization.avro.ActionSerializer
+        "linger.ms": 0
+      topic: stats.events-similarity.v1
+
+logging:
+  level:
+    org.springframework: ERROR
+    ru.practicum: DEBUG
+    apache.kafka: WARN
