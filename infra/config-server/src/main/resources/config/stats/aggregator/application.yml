@@ -1,21 +1,20 @@
 server:
-  port: ${APP_PORT:9391}
+  port: ${APP_PORT:9392}
 
 spring:
   application:
     name: aggregator
 
-grpc:
-  server:
-    port: 0
-    reflection-service-enabled: true
-
-analyzer:
+aggregator:
+  event-weight:
+    view: 0.4
+    register: 0.8
+    like: 1.0
   kafka:
     bootstrap-servers: "localhost:9092"
     consumer:
       properties:
-        "bootstrap.servers": ${analyzer.kafka.bootstrap-servers}
+        "bootstrap.servers": ${aggregator.kafka.bootstrap-servers}
         "client.id": "stats.aggregator.action"
         "key.deserializer": org.apache.kafka.common.serialization.StringDeserializer
         "value.deserializer": ru.practicum.serialization.avro.ActionSerializer
@@ -24,7 +23,7 @@ analyzer:
       poll-timeout-ms: 100
     producer:
       properties:
-        "bootstrap.servers": ${analyzer.kafka.bootstrap-servers}
+        "bootstrap.servers": ${aggregator.kafka.bootstrap-servers}
         "client.id": "stats.aggregator.similarity"
         "key.serializer": org.apache.kafka.common.serialization.VoidSerializer
         "value.serializer": ru.practicum.serialization.avro.ActionSerializer

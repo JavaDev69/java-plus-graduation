@@ -1,9 +1,9 @@
 server:
-  port: ${APP_PORT:9391}
+  port: ${APP_PORT:9393}
 
 spring:
   application:
-    name: collector
+    name: analyzer
 
 grpc:
   server:
