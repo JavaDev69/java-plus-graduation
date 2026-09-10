@@ -16,7 +16,7 @@ collector:
       properties:
         "bootstrap.servers": ${BOOTSTRAP_SERVER:localhost:9092}
         "client.id": "stats.collector"
-        "key.serializer": org.apache.kafka.common.serialization.VoidSerializer
+        "key.serializer": org.apache.kafka.common.serialization.StringSerializer
         "value.serializer": ru.practicum.serialization.avro.ActionSerializer
         "linger.ms": 0
       topic: stats.user-actions.v1

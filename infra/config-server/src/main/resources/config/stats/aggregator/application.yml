@@ -15,9 +15,9 @@ aggregator:
     consumer:
       properties:
         "bootstrap.servers": ${aggregator.kafka.bootstrap-servers}
-        "client.id": "stats.aggregator.action"
+        "group.id": "stats.aggregator.action"
         "key.deserializer": org.apache.kafka.common.serialization.StringDeserializer
-        "value.deserializer": ru.practicum.serialization.avro.ActionSerializer
+        "value.deserializer": ru.practicum.serialization.avro.ActionDeserializer
         "enable-auto-commit": false
       topic: stats.user-actions.v1
       poll-timeout-ms: 100
@@ -25,7 +25,7 @@ aggregator:
       properties:
         "bootstrap.servers": ${aggregator.kafka.bootstrap-servers}
         "client.id": "stats.aggregator.similarity"
-        "key.serializer": org.apache.kafka.common.serialization.VoidSerializer
+        "key.serializer": org.apache.kafka.common.serialization.StringSerializer
         "value.serializer": ru.practicum.serialization.avro.ActionSerializer
         "linger.ms": 0
       topic: stats.events-similarity.v1
