@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.dto.events.EventFullDto;
 import ru.practicum.dto.events.EventShortDto;
@@ -59,7 +60,8 @@ public interface EventOperation {
     );
 
     @GetMapping("/{id}")
-    EventFullDto getPublishedEventById(@PathVariable @Positive Long id);
+    EventFullDto getPublishedEventById(@RequestHeader("X-EWM-USER-ID") long userId,
+                                       @PathVariable @Positive Long id);
 
     @GetMapping("/full/{id}")
     EventFullDto getEventById(@PathVariable @Positive Long id);

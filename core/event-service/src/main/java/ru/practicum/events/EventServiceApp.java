@@ -4,7 +4,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import ru.practicum.StatsClient;
 import ru.practicum.client.CategoryClient;
 import ru.practicum.client.RateClient;
 import ru.practicum.client.RequestClient;
@@ -15,14 +14,13 @@ import ru.practicum.client.UserClient;
  * @created 27.08.2026 - 10:19
  */
 @EnableFeignClients(clients = {
-        StatsClient.class,
         CategoryClient.class,
         RequestClient.class,
         UserClient.class,
         RateClient.class
 })
 @EnableDiscoveryClient
-@SpringBootApplication(scanBasePackages = {"ru.practicum.events", "ru.practicum.error"})
+@SpringBootApplication(scanBasePackages = {"ru.practicum.events", "ru.practicum.error", "ru.practicum.client"})
 public class EventServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(EventServiceApp.class, args);

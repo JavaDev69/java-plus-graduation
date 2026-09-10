@@ -1,24 +1,20 @@
 package ru.practicum.events.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import ru.practicum.StatsClient;
-import ru.practicum.dto.EndpointHit;
+import ru.practicum.client.CollectorClient;
 import ru.practicum.dto.events.EventFullDto;
 import ru.practicum.dto.events.EventShortDto;
 import ru.practicum.dto.events.EventState;
 import ru.practicum.events.dal.model.EventsSortType;
 import ru.practicum.events.service.EventsService;
+import ru.practicum.ewm.stats.proto.ActionTypeProto;
 import ru.practicum.operations.EventOperation;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 @RestController
@@ -28,7 +24,7 @@ public class PublicEventsController implements EventOperation {
     @Value("${spring.application.name}")
     private String serviceName;
     private final EventsService eventService;
-    private final StatsClient statsClient;
+    private final CollectorClient collectorClient;
 
     @Override
     public List<EventShortDto> getEvents(
@@ -42,7 +38,6 @@ public class PublicEventsController implements EventOperation {
             Integer from,
             Integer size
     ) {
-        saveHitInfo();
         return eventService.getPublishedEvents(
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
                 EventsSortType.valueOf(sort), from, size
@@ -50,15 +45,13 @@ public class PublicEventsController implements EventOperation {
     }
 
     @Override
-    public EventFullDto getPublishedEventById(Long id) {
-        saveHitInfo();
-
+    public EventFullDto getPublishedEventById(long userId, Long id) {
+        collectorClient.send(id,userId, ActionTypeProto.ACTION_VIEW);
         return eventService.getPublishedEventById(id);
     }
 
     @Override
     public EventFullDto getEventById(Long id) {
-        saveHitInfo();
 
         return eventService.getEventById(id);
     }
@@ -66,19 +59,6 @@ public class PublicEventsController implements EventOperation {
     @Override
     public List<EventShortDto> getEventByIds(List<Long> ids) {
         return eventService.getShortEventByIds(ids);
-    }
-
-    private void saveHitInfo() {
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        HttpServletRequest request = requestAttributes.getRequest();
-
-        EndpointHit hit = EndpointHit.builder()
-                .app(serviceName)
-                .uri(request.getRequestURI())
-                .ip(request.getRemoteAddr())
-                .timestamp(LocalDateTime.now(ZoneId.systemDefault()))
-                .build();
-        statsClient.saveHit(hit);
     }
 
     @Override
