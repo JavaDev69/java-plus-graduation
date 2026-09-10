@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS interactions (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id BIGINT NOT NULL,
     event_id BIGINT NOT NULL,
-    rating_id FLOAT NOT NULL,
+    rating FLOAT NOT NULL,
     ts TIMESTAMP WITH TIME ZONE NOT NULL,
     UNIQUE (user_id, event_id)
 );

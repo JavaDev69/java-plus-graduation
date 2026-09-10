@@ -108,6 +108,7 @@ services:
     build: ./stats/analyzer
     environment:
       APP_PORT: 0
+      BOOTSTRAP_SERVER: kafka:9092
       EUREKA_HOSTNAME: discovery-server
       EUREKA_PORT: 8761
     depends_on:
@@ -317,6 +318,8 @@ services:
     image: postgres:16.1
     container_name: stats-db
     hostname: stats-db
+    ports:
+      - "5436:5432"
     environment:
       POSTGRES_DB: stats_db
       POSTGRES_USER: dbuser
@@ -326,9 +329,6 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
-    depends_on:
-      config-server:
-        condition: service_started
     networks:
       - ewm-net
 

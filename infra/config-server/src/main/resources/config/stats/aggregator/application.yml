@@ -11,7 +11,7 @@ aggregator:
     register: 0.8
     like: 1.0
   kafka:
-    bootstrap-servers: "localhost:9092"
+    bootstrap-servers: ${BOOTSTRAP_SERVER:localhost:9092}
     consumer:
       properties:
         "bootstrap.servers": ${aggregator.kafka.bootstrap-servers}
