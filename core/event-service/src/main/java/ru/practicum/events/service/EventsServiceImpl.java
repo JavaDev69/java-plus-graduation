@@ -147,9 +147,10 @@ public class EventsServiceImpl implements EventsService {
 
     @Override
     public EventFullDto getPublishedEventById(Long userId, Long eventId) {
-        collectorClient.send(userId, userId, ActionTypeProto.ACTION_VIEW);
         Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Event with eventId=" + eventId + " was not found"));
+
+        collectorClient.send(event.getId(), userId, ActionTypeProto.ACTION_VIEW);
 
         Map<Long, Long> eventToRequest =
                 requestClient.countRequestsByEventIdsAndStatus(singletonList(event.getId()), EventState.CONFIRMED);
