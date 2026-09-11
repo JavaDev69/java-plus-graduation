@@ -299,6 +299,8 @@ services:
     image: postgres:16.1
     container_name: ewm-db
     hostname: ewm-db
+    ports:
+      - "5431:5432"
     environment:
       POSTGRES_DB: ewm_db
       POSTGRES_USER: dbuser
@@ -308,9 +310,6 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
-    depends_on:
-      config-server:
-        condition: service_started
     networks:
       - ewm-net
 

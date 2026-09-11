@@ -1,6 +1,7 @@
 package ru.practicum.operations;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Positive;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.dto.events.EventState;
@@ -20,5 +21,7 @@ public interface RequestOperation {
             @RequestParam @NotEmpty List<Long> eventIds,
             @RequestParam EventState state);
 
-    boolean existByUserAndEvent(long userId, long eventId);
+    @GetMapping("/exist")
+    boolean existByUserAndEvent(@RequestParam @Positive long userId,
+                                @RequestParam @Positive long eventId);
 }
