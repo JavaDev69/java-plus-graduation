@@ -25,7 +25,7 @@ public class AnalyzerClient {
     @GrpcClient("analyzer")
     private RecommendationsControllerGrpc.RecommendationsControllerBlockingStub client;
 
-    public Stream<RecommendedEventProto> getRegetRecommendationsForUser(Long userId, int maxResult) {
+    public Stream<RecommendedEventProto> getRecommendationsForUser(Long userId, int maxResult) {
         UserPredictionsRequestProto requestProto = UserPredictionsRequestProto.newBuilder()
                 .setUserId(userId)
                 .setMaxResults(maxResult)

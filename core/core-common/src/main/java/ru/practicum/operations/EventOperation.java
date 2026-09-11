@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.dto.events.EventFullDto;
@@ -23,6 +24,8 @@ import java.util.List;
  * @project java-plus-graduation
  */
 public interface EventOperation {
+
+    String X_EWM_USER_ID = "X-EWM-USER-ID";
 
     @GetMapping
     List<EventShortDto> getEvents(
@@ -60,7 +63,7 @@ public interface EventOperation {
     );
 
     @GetMapping("/{id}")
-    EventFullDto getPublishedEventById(@RequestHeader("X-EWM-USER-ID") long userId,
+    EventFullDto getPublishedEventById(@RequestHeader(X_EWM_USER_ID) long userId,
                                        @PathVariable @Positive Long id);
 
     @GetMapping("/full/{id}")
@@ -88,4 +91,11 @@ public interface EventOperation {
 
     @GetMapping("/categoty/{id}/check")
     Boolean checkCategoryInUse(@PathVariable("id") Long categoryId);
+
+    @GetMapping("/recommendations")
+    List<EventShortDto> getRecommendations(@RequestHeader(X_EWM_USER_ID) long userId);
+
+    @PutMapping("/events/{eventId}/like")
+    void addLikeToEvent(@RequestHeader(X_EWM_USER_ID) long userId,
+                                       @PathVariable @Positive Long eventId);
 }

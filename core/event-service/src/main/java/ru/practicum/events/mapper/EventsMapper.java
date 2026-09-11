@@ -35,15 +35,15 @@ public class EventsMapper {
         return dto;
     }
 
-    public static EventShortDto toShortEventDto(Event event, CategoryDto category, UserShortDto userShortDto, Long confirmedRequests, Long rating) {
+    public static EventShortDto toShortEventDto(Event event, CategoryDto category, UserShortDto userShortDto, Long confirmedRequests, Double rating) {
         EventShortDto dto = toShortEventDto(event, category, userShortDto, confirmedRequests);
-        dto.setRating(rating != null ? rating : 0L);
+        dto.setRating(rating != null ? rating : 0.);
         return dto;
     }
 
-    public static EventFullDto toEventFullDto(Event event, CategoryDto category, UserShortDto userShortDto, Long rating) {
+    public static EventFullDto toEventFullDto(Event event, CategoryDto category, UserShortDto userShortDto, Double rating) {
         EventFullDto dto = toEventFullDto(event, category, userShortDto);
-        dto.setRating(rating != null ? rating : 0L);
+        dto.setRating(rating != null ? rating : 0.);
         return dto;
     }
 
@@ -73,7 +73,7 @@ public class EventsMapper {
             CategoryDto category,
             UserShortDto userShortDto,
             ModerationComment mc,
-            Long rating
+            Double rating
     ) {
         EventFullDto dto = toEventFullDto(event, category, userShortDto, rating);
         if (mc != null) {

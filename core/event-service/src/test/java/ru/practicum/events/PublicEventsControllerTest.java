@@ -5,22 +5,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.StatsClient;
-import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.events.EventFullDto;
 import ru.practicum.dto.events.EventShortDto;
 import ru.practicum.events.controller.PublicEventsController;
 import ru.practicum.events.dal.model.EventsSortType;
 import ru.practicum.events.service.EventsService;
+import ru.practicum.operations.EventOperation;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isNull;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -39,9 +36,6 @@ public class PublicEventsControllerTest {
 
     @MockBean
     private EventsService eventService;
-
-    @MockBean
-    private StatsClient statsClient;
 
     @Test
     void getEvents_shouldReturnEventsAndRecordHit() throws Exception {
@@ -75,8 +69,6 @@ public class PublicEventsControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Festival"))
                 .andExpect(jsonPath("$[0].views").value(100));
-
-        verify(statsClient).saveHit(any(EndpointHit.class));
     }
 
     @Test
@@ -89,14 +81,12 @@ public class PublicEventsControllerTest {
         event.setPaid(false);
         event.setViews(200L);
 
-        when(eventService.getPublishedEventById(1L)).thenReturn(event);
+        when(eventService.getPublishedEventById(0L, 1L)).thenReturn(event);
 
-        mockMvc.perform(get("/events/1"))
+        mockMvc.perform(get("/events/1").header(EventOperation.X_EWM_USER_ID, "0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Concert"))
                 .andExpect(jsonPath("$.views").value(200));
-
-        verify(statsClient).saveHit(any(EndpointHit.class));
     }
 }
 

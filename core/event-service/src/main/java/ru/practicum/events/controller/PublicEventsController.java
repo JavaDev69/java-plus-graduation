@@ -1,17 +1,14 @@
 package ru.practicum.events.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.client.CollectorClient;
 import ru.practicum.dto.events.EventFullDto;
 import ru.practicum.dto.events.EventShortDto;
 import ru.practicum.dto.events.EventState;
 import ru.practicum.events.dal.model.EventsSortType;
 import ru.practicum.events.service.EventsService;
-import ru.practicum.ewm.stats.proto.ActionTypeProto;
 import ru.practicum.operations.EventOperation;
 
 import java.time.LocalDateTime;
@@ -21,10 +18,7 @@ import java.util.List;
 @RequestMapping("/events")
 @RequiredArgsConstructor
 public class PublicEventsController implements EventOperation {
-    @Value("${spring.application.name}")
-    private String serviceName;
     private final EventsService eventService;
-    private final CollectorClient collectorClient;
 
     @Override
     public List<EventShortDto> getEvents(
@@ -46,8 +40,7 @@ public class PublicEventsController implements EventOperation {
 
     @Override
     public EventFullDto getPublishedEventById(long userId, Long id) {
-        collectorClient.send(id,userId, ActionTypeProto.ACTION_VIEW);
-        return eventService.getPublishedEventById(id);
+        return eventService.getPublishedEventById(userId, id);
     }
 
     @Override
@@ -77,4 +70,13 @@ public class PublicEventsController implements EventOperation {
         return eventService.checkCategoryInUse(categoryId);
     }
 
+    @Override
+    public List<EventShortDto> getRecommendations(long userId) {
+        return eventService.getRecommendations(userId);
+    }
+
+    @Override
+    public void addLikeToEvent(long userId, Long eventId) {
+        eventService.addLikeToEvent(userId,eventId);
+    }
 }

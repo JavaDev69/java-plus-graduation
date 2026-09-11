@@ -8,9 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import ru.practicum.StatsClient;
+import ru.practicum.client.AnalyzerClient;
 import ru.practicum.client.CategoryClient;
-import ru.practicum.client.RateClient;
+import ru.practicum.client.CollectorClient;
 import ru.practicum.client.RequestClient;
 import ru.practicum.client.UserClient;
 import ru.practicum.dto.events.EventFullDto;
@@ -42,11 +42,11 @@ import static org.mockito.Mockito.when;
         })
 class EventServiceImplTest {
     @MockBean EventsRepository eventRepository;
-    @MockBean RateClient rateClient;
-    @MockBean CategoryClient categoryClient;
     @MockBean RequestClient requestClient;
+    @MockBean CategoryClient categoryClient;
     @MockBean UserClient userClient;
-    @MockBean StatsClient statsClient;
+    @MockBean CollectorClient collectorClient;
+    @MockBean AnalyzerClient analyzerClient;
     @MockBean ModerationCommentRepository moderationCommentRepository;
     @MockBean EntityManager entityManager;
 

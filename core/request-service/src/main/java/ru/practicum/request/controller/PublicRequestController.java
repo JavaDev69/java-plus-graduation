@@ -29,4 +29,9 @@ public class PublicRequestController implements RequestOperation {
     public Map<Long,Long> countRequestsByEventIdsAndStatus(List<Long> eventIds, EventState state) {
         return requestsService.countRequestsByEventIdsAndStatus(eventIds,state);
     }
+
+    @Override
+    public boolean existByUserAndEvent(long userId, long eventId) {
+        return requestsService.existByUserAndEvent(userId,eventId);
+    }
 }

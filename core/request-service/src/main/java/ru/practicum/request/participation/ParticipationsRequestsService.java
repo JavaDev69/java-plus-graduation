@@ -4,12 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.client.CollectorClient;
 import ru.practicum.client.EventClient;
 import ru.practicum.client.UserClient;
 import ru.practicum.dto.events.EventFullDto;
 import ru.practicum.dto.events.EventState;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.ewm.stats.proto.ActionTypeProto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.dal.model.ParticipationRequest;
@@ -30,7 +32,7 @@ import static ru.practicum.request.mapper.RequestsMapper.toDto;
 @Slf4j
 public class ParticipationsRequestsService {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
+    private final CollectorClient collectorClient;
     private final UserClient userClient;
     private final EventClient eventClient;
     private RequestRepository requestRepository;
@@ -95,6 +97,7 @@ public class ParticipationsRequestsService {
 
         log.info("Создана заявка на участие с ID: {}, статус: {}", savedRequest.getId(), savedRequest.getStatus());
 
+        collectorClient.send(eventId,userId, ActionTypeProto.ACTION_REGISTER);
         return toDto(savedRequest);
     }
 

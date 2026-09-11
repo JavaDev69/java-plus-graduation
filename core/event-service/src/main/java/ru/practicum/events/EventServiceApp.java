@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import ru.practicum.client.CategoryClient;
-import ru.practicum.client.RateClient;
 import ru.practicum.client.RequestClient;
 import ru.practicum.client.UserClient;
 
@@ -16,8 +15,7 @@ import ru.practicum.client.UserClient;
 @EnableFeignClients(clients = {
         CategoryClient.class,
         RequestClient.class,
-        UserClient.class,
-        RateClient.class
+        UserClient.class
 })
 @EnableDiscoveryClient
 @SpringBootApplication(scanBasePackages = {"ru.practicum.events", "ru.practicum.error", "ru.practicum.client"})

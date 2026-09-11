@@ -19,4 +19,6 @@ public interface RequestOperation {
     Map<Long, Long> countRequestsByEventIdsAndStatus(
             @RequestParam @NotEmpty List<Long> eventIds,
             @RequestParam EventState state);
+
+    boolean existByUserAndEvent(long userId, long eventId);
 }

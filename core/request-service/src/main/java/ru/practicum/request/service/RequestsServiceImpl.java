@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class RequestsServiceImpl implements RequestsService {
-
     private final EventClient eventClient;
     private final RequestRepository requestRepository;
 
@@ -105,7 +104,7 @@ public class RequestsServiceImpl implements RequestsService {
     @Override
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         // 1. Проверяем существование события и принадлежность пользователю
-        EventFullDto event =eventClient.getEventById(eventId);
+        EventFullDto event = eventClient.getEventById(eventId);
 
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ForbiddenActionException("User is not the initiator of the event");
@@ -123,5 +122,10 @@ public class RequestsServiceImpl implements RequestsService {
         return requestRepository.countConfirmedRequestsByEventIds(eventIds, state).stream()
                 .map(e -> Map.entry(e.getEventId(), e.getCount()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    public boolean existByUserAndEvent(long userId, long eventId) {
+        return requestRepository.existsByEventIdAndRequesterId(eventId, userId);
     }
 }

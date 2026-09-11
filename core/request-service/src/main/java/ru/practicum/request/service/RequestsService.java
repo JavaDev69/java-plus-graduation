@@ -15,4 +15,6 @@ public interface RequestsService {
     List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId);
 
     Map<Long, Long> countRequestsByEventIdsAndStatus(List<Long> eventIds, EventState state);
+
+    boolean existByUserAndEvent(long userId, long eventId);
 }
