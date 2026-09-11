@@ -21,8 +21,6 @@ import java.util.Properties;
 @AllArgsConstructor
 @Data
 @ConfigurationProperties("analyzer.kafka.similarity-consumer")
-@Validated
-@ToString
 public class SimilarityConsumerProperties implements ConsumerProperties{
     private Properties properties;
     @NotBlank

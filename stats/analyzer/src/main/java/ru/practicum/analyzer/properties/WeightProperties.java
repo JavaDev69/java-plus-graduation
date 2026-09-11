@@ -19,15 +19,13 @@ import org.springframework.validation.annotation.Validated;
 @AllArgsConstructor
 @Data
 @ConfigurationProperties("analyzer.event-weight")
-@Validated
-@ToString
 public class WeightProperties {
     @NotNull @DecimalMin("0.") @DecimalMax("1.")
-    Double view;
+    private Double view;
 
     @NotNull @DecimalMin("0.") @DecimalMax("1.")
-    Double register;
+    private Double register;
 
     @NotNull @DecimalMin("0.") @DecimalMax("1.")
-    Double like;
+    private Double like;
 }

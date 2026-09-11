@@ -5,7 +5,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.AnalyzerClient;
 import ru.practicum.client.CategoryClient;
 import ru.practicum.client.CollectorClient;
@@ -88,6 +88,7 @@ public class EventsServiceImpl implements EventsService {
         return toEventFullDto(savedEvent, category, user, 0.);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventShortDto> getPublishedEvents(
             String text, List<Long> categoryIds, Boolean paid,
@@ -145,6 +146,7 @@ public class EventsServiceImpl implements EventsService {
         return dtoList;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EventFullDto getPublishedEventById(Long userId, Long eventId) {
         Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
@@ -164,6 +166,7 @@ public class EventsServiceImpl implements EventsService {
         return toEventFullDto(event, category, user, score);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventShortDto> getShortEventByIds(List<Long> ids) {
         List<Event> allById = eventRepository.findAllById(ids);

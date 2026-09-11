@@ -19,8 +19,6 @@ import java.util.Properties;
 @AllArgsConstructor
 @Data
 @ConfigurationProperties("collector.kafka.producer")
-@Validated
-@ToString
 public class KafkaProperties {
     private Properties properties;
     @NotBlank

@@ -30,15 +30,15 @@ public class EventHandlerImpl implements EventHandler {
     //  ключ — это мероприятие,
     //  значение — ещё одно отображение, где ключ — пользователь,
     //  а значение — максимальный вес из всех его действий с этим мероприятием
-    Map<Long, Map<Long, Double>> eventToUserWeight = new HashMap<>();
+    private final Map<Long, Map<Long, Double>> eventToUserWeight = new HashMap<>();
 
     // ключ — мероприятие, а значение — сумма весов действий пользователей с ним
-    Map<Long, Double> eventToWeight = new HashMap<>();
+    private final Map<Long, Double> eventToWeight = new HashMap<>();
 
     // Map<Event, Map<Event, S_min>> — сумма минимальных весов для каждой пары мероприятий
     // ключ - одно из мероприятий,
     // значением — ещё одно отображение, где ключ — второе мероприятие, значение — сумма их минимальных весов
-    Map<Long, Map<Long, Double>> minWeightsSum = new HashMap<>();
+    private final Map<Long, Map<Long, Double>> minWeightsSum = new HashMap<>();
 
     @Override
     public List<EventSimilarityAvro> handleRecord(ConsumerRecord<String, UserActionAvro> record) {

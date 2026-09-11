@@ -21,8 +21,6 @@ import java.util.Properties;
 @AllArgsConstructor
 @Data
 @ConfigurationProperties("analyzer.kafka.actions-consumer")
-@Validated
-@ToString
 public class ActionsConsumerProperties implements ConsumerProperties{
     private Properties properties;
     @NotBlank
