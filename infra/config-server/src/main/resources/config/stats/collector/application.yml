@@ -1,0 +1,28 @@
+server:
+  port: ${APP_PORT:9391}
+
+spring:
+  application:
+    name: collector
+
+grpc:
+  server:
+    port: 0
+    reflection-service-enabled: true
+
+collector:
+  kafka:
+    producer:
+      properties:
+        "bootstrap.servers": ${BOOTSTRAP_SERVER:localhost:9092}
+        "client.id": "stats.collector"
+        "key.serializer": org.apache.kafka.common.serialization.StringSerializer
+        "value.serializer": ru.practicum.serialization.avro.ActionSerializer
+        "linger.ms": 0
+      topic: stats.user-actions.v1
+
+logging:
+  level:
+    org.springframework: ERROR
+    ru.practicum: DEBUG
+    apache.kafka: WARN

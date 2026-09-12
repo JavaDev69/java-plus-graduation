@@ -13,8 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.client.AnalyzerClient;
 import ru.practicum.client.CategoryClient;
-import ru.practicum.client.RateClient;
+import ru.practicum.client.CollectorClient;
 import ru.practicum.client.RequestClient;
 import ru.practicum.client.UserClient;
 import ru.practicum.common.Constance;
@@ -31,9 +32,11 @@ import ru.practicum.exception.NotFoundException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -61,16 +64,11 @@ class PrivateEventControllerTest {
     @Autowired
     private EventsRepository eventRepository;
 
-    @MockBean
-    RequestClient requestClient;
-
-    @MockBean
-    CategoryClient categoryClient;
-
-    @MockBean private RateClient rateClient;
-
-    @MockBean
-    UserClient userClient;
+    @MockBean RequestClient requestClient;
+    @MockBean CategoryClient categoryClient;
+    @MockBean UserClient userClient;
+    @MockBean CollectorClient collectorClient;
+    @MockBean AnalyzerClient analyzerClient;
 
     private UserDto user;
     private Event event;
@@ -117,14 +115,16 @@ class PrivateEventControllerTest {
         when(requestClient.countRequestsByEventIdsAndStatus(any(), any()))
                 .thenReturn(Collections.emptyMap());
 
-        when(rateClient.getRatingByEventId(any()))
-                .thenReturn(0L);
+        when(analyzerClient.getInteractionsCount(any()))
+                .thenReturn(Stream.empty());
 
         when(categoryClient.getCategoryById(any()))
                 .thenReturn(category);
 
         when(categoryClient.getCategoriesByIds(any()))
                 .thenReturn(List.of(category));
+
+        doNothing().when(collectorClient).send(any(), any(), any());
     }
 
     /**
@@ -418,6 +418,9 @@ class PrivateEventControllerTest {
         mockMvc.perform(get("/users/{userId}/events", user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(10)); // по умолчанию size=10
+
+        when(analyzerClient.getInteractionsCount(any()))
+                .thenReturn(Stream.empty());
 
         // When & Then: запрос с явными параметрами пагинации
         mockMvc.perform(get("/users/{userId}/events", user.getId())

@@ -1,4 +1,39 @@
 services:
+  kafka:
+    image: confluentinc/confluent-local:7.4.3
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "9092:9092" # for client connections
+      - "9101:9101" # JMX
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      CLUSTER_ID: 'K0EA9p0yEe6MkAAAAkKsEg'
+    networks:
+      - ewm-net
+
+  kafka-init-topics:
+    image: confluentinc/confluent-local:7.4.3
+    container_name: kafka-init-topics
+    depends_on:
+      - kafka
+    command: "bash -c \
+                'kafka-topics --create --topic stats.user-actions.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092 && \
+                kafka-topics --create --topic stats.events-similarity.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092'"
+    init: true
+    networks:
+      - ewm-net
 
   discovery-server:
     build: ./infra/discovery-server
@@ -17,6 +52,9 @@ services:
     environment:
       EUREKA_HOSTNAME: discovery-server
       EUREKA_PORT: 8761
+      CONFIG_PORT: 8888
+    ports:
+      - "8888:8888"
     depends_on:
       discovery-server:
         condition: service_healthy
@@ -45,13 +83,32 @@ services:
     networks:
       - ewm-net
 
-  stats-server:
-    build: ./stats/stats-server
+  collector:
+    build: ./stats/collector
     environment:
       APP_PORT: 0
-      DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats_db
-      DATASOURCE_USERNAME: dbuser
-      DATASOURCE_PASSWORD: 12345
+      BOOTSTRAP_SERVER: kafka:9092
+      EUREKA_HOSTNAME: discovery-server
+      EUREKA_PORT: 8761
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "true" ]
+      interval: 24h
+      start_period: 10s
+      start_interval: 10s
+    restart: unless-stopped
+    networks:
+      - ewm-net
+
+  analyzer:
+    build: ./stats/analyzer
+    environment:
+      APP_PORT: 0
+      BOOTSTRAP_SERVER: kafka:9092
       EUREKA_HOSTNAME: discovery-server
       EUREKA_PORT: 8761
     depends_on:
@@ -242,6 +299,8 @@ services:
     image: postgres:16.1
     container_name: ewm-db
     hostname: ewm-db
+    ports:
+      - "5431:5432"
     environment:
       POSTGRES_DB: ewm_db
       POSTGRES_USER: dbuser
@@ -251,9 +310,6 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
-    depends_on:
-      config-server:
-        condition: service_started
     networks:
       - ewm-net
 
@@ -261,6 +317,8 @@ services:
     image: postgres:16.1
     container_name: stats-db
     hostname: stats-db
+    ports:
+      - "5436:5432"
     environment:
       POSTGRES_DB: stats_db
       POSTGRES_USER: dbuser
@@ -270,9 +328,6 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
-    depends_on:
-      config-server:
-        condition: service_started
     networks:
       - ewm-net
 

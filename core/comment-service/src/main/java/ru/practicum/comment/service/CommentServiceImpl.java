@@ -41,7 +41,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto addComment(Long userId, Long eventId, NewCommentDto dto) {
         UserDto author = userClient.getById(userId);
-        EventFullDto event = eventClient.getPublishedEventById(eventId);
+        EventFullDto event = eventClient.getPublishedEventById(userId,eventId);
 
         Comment comment = CommentMapper.toComment(dto, event, author);
         Comment saved = commentRepository.save(comment);

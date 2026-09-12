@@ -28,7 +28,7 @@ public interface EventsService {
             int size
     );
 
-    EventFullDto getPublishedEventById(Long id);
+    EventFullDto getPublishedEventById(Long userId,Long eventId);
 
     List<EventShortDto> getShortEventByIds(List<Long> ids);
 
@@ -83,4 +83,8 @@ public interface EventsService {
     EventFullDto getEventById(Long id);
 
     Boolean checkCategoryInUse(Long categoryId);
+
+    void addLikeToEvent(long userId, Long eventId);
+
+    List<EventShortDto> getRecommendations(long userId);
 }

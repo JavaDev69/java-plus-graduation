@@ -1,0 +1,58 @@
+server:
+  port: ${APP_PORT:9393}
+
+spring:
+  application:
+    name: analyzer
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: always
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5436/stats_db}
+    username: ${DATASOURCE_USERNAME:dbuser}
+    password: ${DATASOURCE_PASSWORD:12345}
+
+grpc:
+  server:
+    port: 0
+    reflection-service-enabled: true
+
+analyzer:
+  event-weight:
+    view: 0.4
+    register: 0.8
+    like: 1.0
+  kafka:
+    bootstrap-servers: ${BOOTSTRAP_SERVER:localhost:9092}
+    similarity-consumer:
+      properties:
+        "bootstrap.servers": ${analyzer.kafka.bootstrap-servers}
+        "group.id": "stats.analyzer.similarity"
+        "key.deserializer": org.apache.kafka.common.serialization.StringDeserializer
+        "value.deserializer": ru.practicum.serialization.avro.SimilarityDeserializer
+        "enable-auto-commit": false
+      topic: stats.events-similarity.v1
+      poll-timeout-ms: 100
+    actions-consumer:
+      properties:
+        "bootstrap.servers": ${analyzer.kafka.bootstrap-servers}
+        "group.id": "stats.analyzer.actions"
+        "key.deserializer": org.apache.kafka.common.serialization.StringDeserializer
+        "value.deserializer": ru.practicum.serialization.avro.ActionDeserializer
+        "enable-auto-commit": false
+      topic: stats.user-actions.v1
+      poll-timeout-ms: 100
+
+logging:
+  level:
+    org.springframework: ERROR
+    ru.practicum: DEBUG
+    apache.kafka: WARN

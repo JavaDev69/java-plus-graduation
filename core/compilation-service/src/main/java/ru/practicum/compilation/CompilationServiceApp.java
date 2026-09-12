@@ -6,7 +6,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import ru.practicum.StatsClient;
 import ru.practicum.client.EventClient;
-import ru.practicum.client.RateClient;
 import ru.practicum.client.RequestClient;
 
 /**
@@ -17,7 +16,6 @@ import ru.practicum.client.RequestClient;
 @EnableFeignClients(clients = {
         EventClient.class,
         RequestClient.class,
-        RateClient.class,
         StatsClient.class
 })
 @EnableDiscoveryClient

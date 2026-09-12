@@ -24,6 +24,19 @@ stats:
   server:
     url: ${STATS_SERVER_URL:http://localhost:8081}
 
+grpc:
+  client:
+    analyzer: # <- должно соответствовать значению в @GrpcClient
+      address: 'discovery:///analyzer' # адрес gRPC-сервиса
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+    collector: # <- должно соответствовать значению в @GrpcClient
+      address: 'discovery:///collector' # адрес gRPC-сервиса
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+
 logging:
   level:
     com.fasterxml.jackson: DEBUG
